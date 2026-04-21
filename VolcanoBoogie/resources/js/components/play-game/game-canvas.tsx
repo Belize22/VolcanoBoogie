@@ -1,19 +1,22 @@
 import { useRef, useEffect } from 'react';
+import { Board } from '@/interfaces/board'
 import { drawTiles } from '@/helpers/canvas-game-helpers'
 import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers'
 
 type Props = {
+    board: Board;
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>
 };
 
 export default function GameCanvas({
+    board,
     gameCanvasRef
 }: Props) {
     const uiOverlayRef = useRef<HTMLCanvasElement | null>(null);
 
     function initializeCanvas() {
         if (gameCanvasRef.current !== null) {
-            drawTiles(gameCanvasRef.current);
+            drawTiles(gameCanvasRef.current, board);
         }
 
         if (uiOverlayRef.current !== null) {
