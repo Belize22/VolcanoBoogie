@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { drawTiles } from '@/helpers/canvas-game-helpers'
-import { drawGrid } from '@/helpers/canvas-ui-helpers'
+import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers'
 
 type Props = {
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>
@@ -21,9 +21,33 @@ export default function GameCanvas({
         }
     }
 
+    function handleMouseMove(event: MouseEvent) {
+        if (uiOverlayRef.current != null) {
+            const canvas = uiOverlayRef.current;
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            clearCanvas(canvas);
+            highlightCurrentTile(canvas, x, y);
+            drawGrid(canvas);
+        }
+    }
+
     useEffect(() => {
         initializeCanvas();
     }, [])
+
+    useEffect(() => {
+        if (uiOverlayRef.current !== null) {
+            uiOverlayRef.current.addEventListener("mousemove", handleMouseMove)
+        }
+        return () => {
+            if (uiOverlayRef.current !== null) {
+                uiOverlayRef.current.removeEventListener("mousemove", handleMouseMove)
+            }
+        }
+    })
 
     return (
         <>

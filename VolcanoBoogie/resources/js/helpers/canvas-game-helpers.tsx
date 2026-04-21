@@ -4,7 +4,7 @@ export function drawTiles(canvas: HTMLCanvasElement) {
         const width = canvas.width;
         const height = canvas.height;
 
-        context.fillStyle = 'red';
+        context.fillStyle = 'rgba(50, 0, 0, 1)';
         context.fillRect(0, 0, width, height);
 
         const image = new Image();
