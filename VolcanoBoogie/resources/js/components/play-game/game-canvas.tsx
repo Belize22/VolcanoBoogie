@@ -1,4 +1,6 @@
 import { useRef, useEffect } from 'react';
+import { drawTiles } from '@/helpers/canvas-game-helpers'
+import { drawGrid } from '@/helpers/canvas-ui-helpers'
 
 type Props = {
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>
@@ -11,46 +13,11 @@ export default function GameCanvas({
 
     function initializeCanvas() {
         if (gameCanvasRef.current !== null) {
-            const context = gameCanvasRef.current.getContext("2d");
-            if (context) {
-                const width = gameCanvasRef.current.width;
-                const height = gameCanvasRef.current.height;
-
-                context.fillStyle = 'red';
-                context.fillRect(0, 0, width, height);
-
-                const image = new Image();
-                image.src = 'http://localhost:8000/storage/images/4waysafe.png'
-                image.onload = () => {
-                    context.drawImage(image, 500, 600)
-                };
-            }
+            drawTiles(gameCanvasRef.current);
         }
 
         if (uiOverlayRef.current !== null) {
-            const context = uiOverlayRef.current.getContext("2d");
-            if (context) {
-                const width = uiOverlayRef.current.width;
-                const height = uiOverlayRef.current.height;
-
-                for (let i = 1; i < Math.floor(width/10); i++) {
-                    context.strokeStyle = 'white';
-                    context.beginPath();
-                    context.setLineDash([5, 2]);
-                    context.moveTo(i * 100, 0);
-                    context.lineTo(i * 100, height);
-                    context.stroke();
-                }
-
-                for (let i = 1; i < Math.floor(height/10); i++) {
-                    context.strokeStyle = 'white';
-                    context.beginPath();
-                    context.setLineDash([5, 2]);
-                    context.moveTo(0, i * 100);
-                    context.lineTo(width, i * 100);
-                    context.stroke();
-                }
-            }
+            drawGrid(uiOverlayRef.current);
         }
     }
 
