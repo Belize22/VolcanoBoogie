@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { Board } from '@/interfaces/board'
+import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers'
 import { drawTiles } from '@/helpers/canvas-game-helpers'
 import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers'
 
@@ -14,8 +15,8 @@ export default function GameCanvas({
 }: Props) {
     const uiOverlayRef = useRef<HTMLCanvasElement | null>(null);
 
-    function initializeCanvas() {
-        resizeCanvas();
+    function renderCanvasElements() {
+        resizeCanvases();
         if (gameCanvasRef.current !== null) {
             drawTiles(gameCanvasRef.current, board);
         }
@@ -38,33 +39,27 @@ export default function GameCanvas({
         }
     }
 
-    function resizeCanvas() {
-        if (uiOverlayRef.current != null) {
-            const canvas = uiOverlayRef.current;
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-        }        
-        if (gameCanvasRef.current != null) {
-            const canvas = gameCanvasRef.current;
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-        }
+    function resizeCanvases() {
+        gameCanvasRef.current ? adjustCanvasSizeToElement(gameCanvasRef.current) : {};
+        uiOverlayRef.current ? adjustCanvasSizeToElement(uiOverlayRef.current) : {};
     }
 
     useEffect(() => {
-        initializeCanvas();
-    }, [])
+        renderCanvasElements();
+    }, []);
 
     useEffect(() => {
+        window.addEventListener("resize", renderCanvasElements);
         if (uiOverlayRef.current !== null) {
             uiOverlayRef.current.addEventListener("mousemove", handleMouseMove)
         }
         return () => {
+            window.removeEventListener("resize", renderCanvasElements);
             if (uiOverlayRef.current !== null) {
                 uiOverlayRef.current.removeEventListener("mousemove", handleMouseMove)
             }
         }
-    })
+    });
 
     return (
         <>
