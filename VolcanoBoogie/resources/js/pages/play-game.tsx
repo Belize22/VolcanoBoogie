@@ -1,6 +1,8 @@
 import { Head } from '@inertiajs/react';
 import { useRef } from 'react';
 import { Board } from '@/interfaces/board'
+import Sidebar from '@/components/play-game/sidebar'
+import Footer from '@/components/play-game/footer'
 import GameCanvas from '@/components/play-game/game-canvas'
 
 export default function PlayGame() {
@@ -15,11 +17,13 @@ export default function PlayGame() {
     return (
         <>
             <Head title="Play Game" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex w-screen h-screen flex-1 flex-col gap-4 overflow-x-auto">
                 <GameCanvas
                     board={board}
                     gameCanvasRef={gameCanvasRef}
                 />
+                <Footer />
+                <Sidebar />
             </div>
         </>
     );

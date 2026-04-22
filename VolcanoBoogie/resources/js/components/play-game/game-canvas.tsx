@@ -15,6 +15,7 @@ export default function GameCanvas({
     const uiOverlayRef = useRef<HTMLCanvasElement | null>(null);
 
     function initializeCanvas() {
+        resizeCanvas();
         if (gameCanvasRef.current !== null) {
             drawTiles(gameCanvasRef.current, board);
         }
@@ -37,6 +38,19 @@ export default function GameCanvas({
         }
     }
 
+    function resizeCanvas() {
+        if (uiOverlayRef.current != null) {
+            const canvas = uiOverlayRef.current;
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }        
+        if (gameCanvasRef.current != null) {
+            const canvas = gameCanvasRef.current;
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+    }
+
     useEffect(() => {
         initializeCanvas();
     }, [])
@@ -54,9 +68,9 @@ export default function GameCanvas({
 
     return (
         <>
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <canvas style={{position: "absolute", zIndex: 0}} id="gameCanvas" width="1080" height="720" ref={gameCanvasRef}></canvas>
-                <canvas style={{position: "absolute", zIndex: 1}} id="gameCanvas" width="1080" height="720" ref={uiOverlayRef}></canvas>
+            <div className="max-w-3/4 flex-1 bg-gray-100 p-4">
+                <canvas style={{position: "absolute", top: 0, left: 0, zIndex: 0}} id="gameCanvas" className="w-8/10 h-9/10" ref={gameCanvasRef}></canvas>
+                <canvas style={{position: "absolute", top: 0, left: 0, zIndex: 1}} id="uiCanvas" className="w-8/10 h-9/10" ref={uiOverlayRef}></canvas>
             </div>
         </>
     );
