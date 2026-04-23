@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useState, useRef } from 'react';
 import { Board } from '@/interfaces/board'
+import { CanvasInteractionState } from '@/enums/canvas-interaction-state'
 import Sidebar from '@/components/play-game/sidebar'
 import Footer from '@/components/play-game/footer'
 import GameCanvas from '@/components/play-game/game-canvas'
@@ -9,6 +10,11 @@ export default function PlayGame() {
     const DEFAULT_ZOOM_FACTOR = 1;
 
     const [zoomFactor, setZoomFactor] = useState<number>(DEFAULT_ZOOM_FACTOR);
+    const [canvasInteractionState, setCanvasInteractionState] = 
+        useState<CanvasInteractionState>(
+            CanvasInteractionState.GAME_INTERACTION
+        );
+
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const board: Board = {
@@ -32,6 +38,8 @@ export default function PlayGame() {
                 <Sidebar 
                     zoomFactor={zoomFactor}
                     setZoomFactor={setZoomFactor}
+                    canvasInteractionState={canvasInteractionState}
+                    setCanvasInteractionState={setCanvasInteractionState}
                 />
             </div>
         </>
