@@ -1,11 +1,14 @@
-import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
-import { Board } from '@/interfaces/board'
-import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers'
-import { drawTiles } from '@/helpers/canvas-game-helpers'
-import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers'
+import { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
+import { Board } from '@/interfaces/board';
+import { Coordinate } from '@/interfaces/coordinate';
+import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers';
+import { drawTiles } from '@/helpers/canvas-game-helpers';
+import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers';
 
 type Props = {
     board: Board;
+    canvasCenter: Coordinate;
+    setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
     zoomFactor: number;
     setZoomFactor: Dispatch<SetStateAction<number>>;
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -13,6 +16,8 @@ type Props = {
 
 export default function GameCanvas({
     board,
+    canvasCenter,
+    setCanvasCenter,
     zoomFactor,
     setZoomFactor,
     gameCanvasRef
@@ -27,11 +32,11 @@ export default function GameCanvas({
     function renderCanvasElements() {
         resizeCanvases();
         if (gameCanvasRef.current !== null) {
-            drawTiles(gameCanvasRef.current, board, TILE_SIZE);
+            drawTiles(gameCanvasRef.current, board, TILE_SIZE, canvasCenter);
         }
 
         if (uiOverlayRef.current !== null) {
-            drawGrid(uiOverlayRef.current, TILE_SIZE);
+            drawGrid(uiOverlayRef.current, TILE_SIZE, canvasCenter);
         }
     }
 
@@ -43,8 +48,8 @@ export default function GameCanvas({
             const y = event.clientY - rect.top;
 
             clearCanvas(canvas);
-            highlightCurrentTile(canvas, x, y, TILE_SIZE);
-            drawGrid(canvas, TILE_SIZE);
+            highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter);
+            drawGrid(canvas, TILE_SIZE, canvasCenter);
         }
     }
 
@@ -67,7 +72,7 @@ export default function GameCanvas({
 
     useEffect(() => {
         renderCanvasElements();
-    }, []);
+    }, [canvasCenter]);
 
     useEffect(() => {
         window.addEventListener("resize", renderCanvasElements);
