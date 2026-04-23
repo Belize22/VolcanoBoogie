@@ -1,6 +1,6 @@
 import { Board } from '@/interfaces/board'
 
-export function drawTiles(canvas: HTMLCanvasElement, board: Board) {
+export function drawTiles(canvas: HTMLCanvasElement, board: Board, tileSize: number) {
     const context = canvas.getContext("2d");
     if (context) {
         const width = canvas.width;
@@ -15,7 +15,11 @@ export function drawTiles(canvas: HTMLCanvasElement, board: Board) {
                 const subtile = board.tiles[i].subtiles[j];
                 image.src = `http://localhost:8000/storage/images/${subtile.image}`
                 image.onload = () => {
-                    context.drawImage(image, 500 + (subtile.coordinate.x * 100), 600 + (subtile.coordinate.y * 100))
+                    context.drawImage(
+                        image, 
+                        (canvas.width/2 - tileSize/2) + (subtile.coordinate.x * tileSize), 
+                        (canvas.height/2 - tileSize/2) + (subtile.coordinate.y * tileSize)
+                    )
                 };
             }
         }

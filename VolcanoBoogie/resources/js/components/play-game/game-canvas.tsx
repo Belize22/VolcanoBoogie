@@ -17,6 +17,7 @@ export default function GameCanvas({
     setZoomFactor,
     gameCanvasRef
 }: Props) {
+    const TILE_SIZE = 100;
     const MIN_ZOOM_FACTOR = 0.1;
     const MAX_ZOOM_FACTOR = 10;
     const SCROLL_SENSITIVITY = 0.01;
@@ -26,11 +27,11 @@ export default function GameCanvas({
     function renderCanvasElements() {
         resizeCanvases();
         if (gameCanvasRef.current !== null) {
-            drawTiles(gameCanvasRef.current, board);
+            drawTiles(gameCanvasRef.current, board, TILE_SIZE);
         }
 
         if (uiOverlayRef.current !== null) {
-            drawGrid(uiOverlayRef.current);
+            drawGrid(uiOverlayRef.current, TILE_SIZE);
         }
     }
 
@@ -42,8 +43,8 @@ export default function GameCanvas({
             const y = event.clientY - rect.top;
 
             clearCanvas(canvas);
-            highlightCurrentTile(canvas, x, y);
-            drawGrid(canvas);
+            highlightCurrentTile(canvas, x, y, TILE_SIZE);
+            drawGrid(canvas, TILE_SIZE);
         }
     }
 
