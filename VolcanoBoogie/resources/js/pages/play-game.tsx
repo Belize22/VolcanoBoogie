@@ -8,9 +8,10 @@ import Footer from '@/components/play-game/footer';
 import GameCanvas from '@/components/play-game/game-canvas';
 
 export default function PlayGame() {
-    const DEFAULT_ZOOM_FACTOR = 1;
+    const DEFAULT_CANVAS_CENTER: Coordinate = {x: 0, y: 0};
+    const DEFAULT_ZOOM_FACTOR: number = 1;
 
-    const [canvasCenter, setCanvasCenter] = useState<Coordinate>({x: 0, y: 0})
+    const [canvasCenter, setCanvasCenter] = useState<Coordinate>(DEFAULT_CANVAS_CENTER)
     const [zoomFactor, setZoomFactor] = useState<number>(DEFAULT_ZOOM_FACTOR);
     const [canvasInteractionState, setCanvasInteractionState] = 
         useState<CanvasInteractionState>(
@@ -36,12 +37,16 @@ export default function PlayGame() {
                     setCanvasCenter={setCanvasCenter}
                     zoomFactor={zoomFactor}
                     setZoomFactor={setZoomFactor}
+                    canvasInteractionState={canvasInteractionState}
                     gameCanvasRef={gameCanvasRef}
                 />
                 <Footer />
-                <Sidebar 
+                <Sidebar
+                    setCanvasCenter={setCanvasCenter}
+                    defaultCanvasCenter={DEFAULT_CANVAS_CENTER}
                     zoomFactor={zoomFactor}
                     setZoomFactor={setZoomFactor}
+                    defaultZoomFactor={DEFAULT_ZOOM_FACTOR}
                     canvasInteractionState={canvasInteractionState}
                     setCanvasInteractionState={setCanvasInteractionState}
                 />

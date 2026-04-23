@@ -1,20 +1,32 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Gamepad, Hand, CircleDot } from 'lucide-react'
+import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state'
 
 type Props = {
+    setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
+    defaultCanvasCenter: Coordinate;
     setZoomFactor: Dispatch<SetStateAction<number>>;
+    defaultZoomFactor: number;
     canvasInteractionState: CanvasInteractionState;
     setCanvasInteractionState: Dispatch<SetStateAction<CanvasInteractionState>>;
 };
 
 export default function ControlPane({
+    setCanvasCenter,
+    defaultCanvasCenter,
     setZoomFactor,
+    defaultZoomFactor,
     canvasInteractionState,
     setCanvasInteractionState
 }: Props) {
-    const UNSELECTED_STYLE = "mx-1 text-stone-300 hover:scale-110 hover:text-stone-100"
-    const SELECTED_STYLE = "mx-1 bg-stone-100 text-stone-900 rounded-md"
+    const UNSELECTED_STYLE = "mx-1 text-stone-300 hover:scale-110 hover:text-stone-100";
+    const SELECTED_STYLE = "mx-1 bg-stone-100 text-stone-900 rounded-md";
+
+    function resetCenterAndZoom() {
+        setCanvasCenter(defaultCanvasCenter);
+        setZoomFactor(defaultZoomFactor);
+    }
 
     return (
         <div className="flex justify-center bg-stone-700 border-l shadow-lg rounded-xl p-4">
@@ -35,6 +47,7 @@ export default function ControlPane({
             <div className="w-0.5 h-6 mx-1 bg-stone-200"></div>
             <CircleDot 
                 className={UNSELECTED_STYLE}
+                onClick={resetCenterAndZoom}
             />
         </div>
     );

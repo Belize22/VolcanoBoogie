@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
+import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers';
 import { drawTiles } from '@/helpers/canvas-game-helpers';
 import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers';
@@ -11,6 +12,7 @@ type Props = {
     setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
     zoomFactor: number;
     setZoomFactor: Dispatch<SetStateAction<number>>;
+    canvasInteractionState: CanvasInteractionState;
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>;
 };
 
@@ -20,12 +22,15 @@ export default function GameCanvas({
     setCanvasCenter,
     zoomFactor,
     setZoomFactor,
+    canvasInteractionState,
     gameCanvasRef
 }: Props) {
     const TILE_SIZE = 100;
     const MIN_ZOOM_FACTOR = 0.1;
     const MAX_ZOOM_FACTOR = 10;
     const SCROLL_SENSITIVITY = 0.01;
+
+    const [isMovingCanvas, setIsMovingCanvas] = useState<boolean>(false);
 
     const uiOverlayRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -40,16 +45,40 @@ export default function GameCanvas({
         }
     }
 
-    function handleMouseMove(event: MouseEvent) {
-        if (uiOverlayRef.current != null) {
-            const canvas = uiOverlayRef.current;
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
+    function handleMouseDown(event: MouseEvent) {
+        if (canvasInteractionState === CanvasInteractionState.MOVE_CANVAS) {
+            setIsMovingCanvas(true);
+        }
+    }
 
-            clearCanvas(canvas);
-            highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter);
-            drawGrid(canvas, TILE_SIZE, canvasCenter);
+    function handleMouseUp(event: MouseEvent) {
+        if (canvasInteractionState === CanvasInteractionState.MOVE_CANVAS) {
+            setIsMovingCanvas(false);
+        }
+    }
+
+    function handleMouseMove(event: MouseEvent) {
+        if (canvasInteractionState === CanvasInteractionState.GAME_INTERACTION) {
+            if (uiOverlayRef.current != null) {
+                const canvas = uiOverlayRef.current;
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                clearCanvas(canvas);
+                highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter);
+                drawGrid(canvas, TILE_SIZE, canvasCenter);
+            }
+        }
+        else if (canvasInteractionState === CanvasInteractionState.MOVE_CANVAS
+            && isMovingCanvas
+        ) {
+            setCanvasCenter(
+                {
+                    x: canvasCenter.x + event.movementX, 
+                    y: canvasCenter.y + event.movementY
+                }
+            )
         }
     }
 
@@ -72,18 +101,23 @@ export default function GameCanvas({
 
     useEffect(() => {
         renderCanvasElements();
-    }, [canvasCenter]);
+    }, [canvasCenter, canvasInteractionState]);
 
     useEffect(() => {
         window.addEventListener("resize", renderCanvasElements);
         if (uiOverlayRef.current !== null) {
+            uiOverlayRef.current.addEventListener("mousedown", handleMouseDown);
+            uiOverlayRef.current.addEventListener("mouseup", handleMouseUp);
             uiOverlayRef.current.addEventListener("mousemove", handleMouseMove);
             uiOverlayRef.current.addEventListener("wheel", handleMouseScroll);
         }
         return () => {
             window.removeEventListener("resize", renderCanvasElements);
             if (uiOverlayRef.current !== null) {
+                uiOverlayRef.current.removeEventListener("mousedown", handleMouseDown);
+                uiOverlayRef.current.removeEventListener("mouseup", handleMouseUp);
                 uiOverlayRef.current.removeEventListener("mousemove", handleMouseMove);
+                uiOverlayRef.current.removeEventListener("wheel", handleMouseScroll);
             }
         }
     });
