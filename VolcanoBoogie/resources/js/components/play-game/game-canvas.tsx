@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import { Board } from '@/interfaces/board'
 import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers'
 import { drawTiles } from '@/helpers/canvas-game-helpers'
@@ -6,13 +6,21 @@ import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui
 
 type Props = {
     board: Board;
-    gameCanvasRef: React.RefObject<HTMLCanvasElement | null>
+    zoomFactor: number;
+    setZoomFactor: Dispatch<SetStateAction<number>>;
+    gameCanvasRef: React.RefObject<HTMLCanvasElement | null>;
 };
 
 export default function GameCanvas({
     board,
+    zoomFactor,
+    setZoomFactor,
     gameCanvasRef
 }: Props) {
+    const MIN_ZOOM_FACTOR = 0.1;
+    const MAX_ZOOM_FACTOR = 10;
+    const SCROLL_SENSITIVITY = 0.01;
+
     const uiOverlayRef = useRef<HTMLCanvasElement | null>(null);
 
     function renderCanvasElements() {
@@ -39,6 +47,18 @@ export default function GameCanvas({
         }
     }
 
+    function handleMouseScroll(event: WheelEvent) {
+        if (uiOverlayRef.current != null) {
+            let updatedZoomFactor = zoomFactor - event.deltaY * SCROLL_SENSITIVITY
+
+            //Clamp between MIN_ZOOM_FACTOR and MAX_ZOOM_FACTOR
+            updatedZoomFactor = Math.max(MIN_ZOOM_FACTOR, Math.min(MAX_ZOOM_FACTOR, updatedZoomFactor));
+            updatedZoomFactor = Math.round(updatedZoomFactor * 10) / 10; //1 decimal place.
+
+            setZoomFactor(updatedZoomFactor);
+        }
+    }
+
     function resizeCanvases() {
         gameCanvasRef.current ? adjustCanvasSizeToElement(gameCanvasRef.current) : {};
         uiOverlayRef.current ? adjustCanvasSizeToElement(uiOverlayRef.current) : {};
@@ -51,12 +71,13 @@ export default function GameCanvas({
     useEffect(() => {
         window.addEventListener("resize", renderCanvasElements);
         if (uiOverlayRef.current !== null) {
-            uiOverlayRef.current.addEventListener("mousemove", handleMouseMove)
+            uiOverlayRef.current.addEventListener("mousemove", handleMouseMove);
+            uiOverlayRef.current.addEventListener("wheel", handleMouseScroll);
         }
         return () => {
             window.removeEventListener("resize", renderCanvasElements);
             if (uiOverlayRef.current !== null) {
-                uiOverlayRef.current.removeEventListener("mousemove", handleMouseMove)
+                uiOverlayRef.current.removeEventListener("mousemove", handleMouseMove);
             }
         }
     });
