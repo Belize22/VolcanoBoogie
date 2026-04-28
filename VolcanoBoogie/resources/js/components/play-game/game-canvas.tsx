@@ -4,7 +4,7 @@ import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers';
 import { drawTiles } from '@/helpers/canvas-game-helpers';
-import { clearCanvas, highlightCurrentTile, drawGrid } from '@/helpers/canvas-ui-helpers';
+import { clearCanvas, highlightCurrentTile, convertCanvasCoordinatesToTileCoordinates, drawGrid } from '@/helpers/canvas-ui-helpers';
 
 type Props = {
     board: Board;
@@ -13,6 +13,7 @@ type Props = {
     zoomFactor: number;
     setZoomFactor: Dispatch<SetStateAction<number>>;
     canvasInteractionState: CanvasInteractionState;
+    placeTile: (coordinate: Coordinate) => void;
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>;
 };
 
@@ -23,12 +24,13 @@ export default function GameCanvas({
     zoomFactor,
     setZoomFactor,
     canvasInteractionState,
+    placeTile,
     gameCanvasRef
 }: Props) {
     const TILE_SIZE = 100;
     const MIN_ZOOM_FACTOR = 0.5;
     const MAX_ZOOM_FACTOR = 5;
-    const SCROLL_SENSITIVITY = 0.005;
+    const SCROLL_SENSITIVITY = 0.2;
 
     const [isMovingCanvas, setIsMovingCanvas] = useState<boolean>(false);
 
@@ -46,7 +48,30 @@ export default function GameCanvas({
     }
 
     function handleMouseDown(event: MouseEvent) {
-        if (canvasInteractionState === CanvasInteractionState.MOVE_CANVAS) {
+        if (canvasInteractionState === CanvasInteractionState.GAME_INTERACTION) {
+            if (uiOverlayRef.current != null) {
+                const canvas = uiOverlayRef.current;
+                const rect = canvas.getBoundingClientRect();
+                const posX = event.clientX - rect.left;
+                const posY = event.clientY - rect.top;
+
+                let coordinate: Coordinate | null = null;
+
+                coordinate = convertCanvasCoordinatesToTileCoordinates(
+                    canvas, 
+                    posX, 
+                    posY, 
+                    TILE_SIZE, 
+                    canvasCenter, 
+                    zoomFactor
+                );
+
+                if (coordinate) {
+                    placeTile(coordinate);
+                }
+            }
+        }
+        else if (canvasInteractionState === CanvasInteractionState.MOVE_CANVAS) {
             setIsMovingCanvas(true);
         }
     }
@@ -84,7 +109,7 @@ export default function GameCanvas({
 
     function handleMouseScroll(event: WheelEvent) {
         if (uiOverlayRef.current != null) {
-            let updatedZoomFactor = zoomFactor - event.deltaY * SCROLL_SENSITIVITY
+            let updatedZoomFactor = zoomFactor - Math.sign(event.deltaY) * SCROLL_SENSITIVITY
 
             //Clamp between MIN_ZOOM_FACTOR and MAX_ZOOM_FACTOR
             updatedZoomFactor = Math.max(MIN_ZOOM_FACTOR, Math.min(MAX_ZOOM_FACTOR, updatedZoomFactor));
@@ -101,7 +126,7 @@ export default function GameCanvas({
 
     useEffect(() => {
         renderCanvasElements();
-    }, [canvasCenter, zoomFactor, canvasInteractionState]);
+    }, [board, canvasCenter, zoomFactor, canvasInteractionState]);
 
     useEffect(() => {
         window.addEventListener("resize", renderCanvasElements);

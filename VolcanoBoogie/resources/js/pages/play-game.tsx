@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { useState, useRef } from 'react';
 import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
+import { Tile } from '@/interfaces/tile';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import Sidebar from '@/components/play-game/sidebar';
 import Footer from '@/components/play-game/footer';
@@ -20,12 +21,20 @@ export default function PlayGame() {
 
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const board: Board = {
+    const [board, setBoard] = useState<Board>({
         tiles: [
             {subtiles: [{coordinate: {x: 0, y: 0}, image: '4waysafe.png'}]},
             {subtiles: [{coordinate: {x: -2, y: -2}, image: '4waysafe.png'}]}
         ]
-    };
+    });
+
+    function placeTile(coordinate: Coordinate) {
+        const coordinates = board.tiles.flatMap(tile => tile.subtiles.flatMap(subtile => subtile.coordinate));
+        if (!coordinates.some(currentCoordinate => currentCoordinate.x === coordinate.x && currentCoordinate.y === coordinate.y)) {
+            const newTile: Tile = {subtiles: [{coordinate: coordinate, image: '4waysafe.png'}]}
+            setBoard({...board, tiles: [...board.tiles, newTile]})
+        }
+    }
     
     return (
         <>
@@ -38,6 +47,7 @@ export default function PlayGame() {
                     zoomFactor={zoomFactor}
                     setZoomFactor={setZoomFactor}
                     canvasInteractionState={canvasInteractionState}
+                    placeTile={placeTile}
                     gameCanvasRef={gameCanvasRef}
                 />
                 <Footer />

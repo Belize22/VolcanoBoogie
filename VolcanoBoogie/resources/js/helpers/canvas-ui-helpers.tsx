@@ -78,3 +78,24 @@ export function highlightCurrentTile(
         context.fillRect(x + WIDTH_OFFSET, y + HEIGHT_OFFSET, adjustedTileSize, adjustedTileSize);
     }
 }
+
+export function convertCanvasCoordinatesToTileCoordinates(
+    canvas: HTMLCanvasElement,
+    posX: number, 
+    posY: number, 
+    tileSize: number, 
+    canvasCenter: Coordinate,
+    zoomFactor: number
+): Coordinate | null {
+
+    const context = canvas.getContext("2d");
+    if (context) {
+        const adjustedTileSize = zoomFactor * tileSize;
+
+        const x = Math.floor((posX - (canvas.width/2 - adjustedTileSize/2) - canvasCenter.x)/adjustedTileSize);
+        const y = Math.floor((posY - (canvas.height/2 - adjustedTileSize/2) - canvasCenter.y)/adjustedTileSize);
+
+        return {x: x, y: y};
+    }
+    return null;
+}
