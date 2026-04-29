@@ -34,6 +34,7 @@ return new class extends Migration
                 'bridge',
                 'key_chamber'
             ]);
+            $table->integer('quantity');
             $table->timestamps();
         });
     }

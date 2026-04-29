@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('placed_subtiles', function (Blueprint $table) {
             $table->id();
-            $table->number('x_coordinate');
-            $table->number('y_coordinate');
+            $table->integer('x_coordinate');
+            $table->integer('y_coordinate');
             $table->boolean('is_neutralized');
             $table->enum('path_type', ['4_way', 't_junction', 'l_junction', 'straight', 'dead_end']);
             $table->enum('property', [
@@ -29,10 +29,7 @@ return new class extends Migration
                 'sanctum_entrance',
                 'sanctum_chamber'
             ]);
-            $table->enum('item', ['none', 'key', 'artifact']);
             $table->timestamps();
-
-            //TO-DO: Create many-to-many bridge table for adjacent subtiles.
         });
     }
 
