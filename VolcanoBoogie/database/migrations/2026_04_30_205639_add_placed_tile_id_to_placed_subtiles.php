@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('placed_tiles', function (Blueprint $table) {
-            $table->foreignId('anchor')->nullable()->constrained('placed_subtiles')->onDelete('cascade');
+        Schema::table('placed_subtiles', function (Blueprint $table) {
+            $table->foreignId('placed_tile_id')->constrained('placed_tiles')->onDelete('cascade');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('placed_tiles', function (Blueprint $table) {
-            $table->dropColumn(['anchor']);
+        Schema::table('placed_subtiles', function (Blueprint $table) {
+            $table->dropColumn('placed_tile_id');
         });
     }
 };

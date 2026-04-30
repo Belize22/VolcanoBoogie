@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::table('placed_subtiles', function (Blueprint $table) {
+            $table->enum('rotation', ['north', 'east', 'south', 'west']);
+        });
+
         Schema::table('placed_tiles', function (Blueprint $table) {
-            $table->foreignId('anchor')->nullable()->constrained('placed_subtiles')->onDelete('cascade');
+            $table->dropColumn('rotation');
         });
     }
 
@@ -22,7 +26,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('placed_tiles', function (Blueprint $table) {
-            $table->dropColumn(['anchor']);
+            $table->enum('rotation', ['north', 'east', 'south', 'west']);
+        });
+
+        Schema::table('placed_subtiles', function (Blueprint $table) {
+            $table->dropColumn('rotation');
         });
     }
 };
