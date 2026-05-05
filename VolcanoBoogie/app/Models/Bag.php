@@ -10,16 +10,16 @@ use App\Models\BaggedTile;
 use App\Models\Game;
 
 #[Fillable(['game_id'])]
-class Board extends Model
-{
+class Bag extends Model
+{    
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
-    public function placedTiles(): HasMany
+    public function baggedTiles(): HasMany
     {
-        return $this->hasMany(PlacedTile::class);
+        return $this->hasMany(BaggedTile::class);
     }
 
     protected function casts(): array

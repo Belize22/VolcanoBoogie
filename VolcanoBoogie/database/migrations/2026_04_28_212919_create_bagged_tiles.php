@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bagged_tiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('game_id')->constrained('games')->onDelete('cascade');
+            $table->foreignId('bag_id')->constrained('bags')->onDelete('cascade');
             $table->foreignId('tile_id')->constrained('tiles')->onDelete('cascade');
             $table->timestamps();
         });

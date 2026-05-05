@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Bag;
 use App\Models\Game;
 use App\Models\Board;
 use App\Models\BaggedTile;
@@ -26,7 +27,16 @@ class GameController extends Controller
             $activeGame = $this->createGame();
         }
 
-        return Inertia::render('play-game', []);
+        $game = $activeGame::with([
+            'board.placedTiles.placedSubtiles'
+        ])->first();
+        
+        $tiles = Tile::all();
+
+        return Inertia::render('play-game', [
+            'game' => $game,
+            'tiles' => $tiles
+        ]);
     }
 
     private function createGame()
@@ -39,6 +49,10 @@ class GameController extends Controller
             'game_id' => $game->id,
         ]);
 
+        $bag = Bag::create([
+            'game_id' => $game->id,
+        ]);
+
         $tilesToBag = Tile::whereNotIn('tile_type', ['entrance', 'west_wing', 'east_wing'])->get();
         $tilesToPlace = Tile::whereIn('tile_type', ['entrance', 'west_wing', 'east_wing'])->get();
         
@@ -46,7 +60,7 @@ class GameController extends Controller
         foreach ($tilesToBag as $tile) {
             for ($i = 0; $i < $tile->quantity; $i++) {
                 $baggedTile = BaggedTile::create([
-                    'game_id' => $game->id,
+                    'bag_id' => $bag->id,
                     'tile_id' => $tile->id,
                 ]);
             }
@@ -58,10 +72,6 @@ class GameController extends Controller
                 'board_id' => $board->id,
                 'tile_id' => $tile->id,
             ]);
-
-            \Log::info($tile->id);
-            \Log::info($placedTile->id);
-            \Log::info($placedTile->tile_id);
 
             $tileInstance = Tile::find($placedTile->tile_id);
 

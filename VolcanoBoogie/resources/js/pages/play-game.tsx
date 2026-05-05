@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useState, useRef } from 'react';
 import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
@@ -9,6 +9,10 @@ import Footer from '@/components/play-game/footer';
 import GameCanvas from '@/components/play-game/game-canvas';
 
 export default function PlayGame() {
+    const { game, tiles } = usePage().props;
+    console.log(game);
+    console.log(tiles);
+
     const DEFAULT_CANVAS_CENTER: Coordinate = {x: 0, y: 0};
     const DEFAULT_ZOOM_FACTOR: number = 1;
 

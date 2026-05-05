@@ -77,10 +77,6 @@ class TileSeeder extends Seeder
                 'quantity' => 2,
             ],
             [
-                'tile_type' => TileType::GUARDIAN_L_JUNCTION,
-                'quantity' => 2,
-            ],
-            [
                 'tile_type' => TileType::SPIKE_TRAP,
                 'quantity' => 3,
             ],
