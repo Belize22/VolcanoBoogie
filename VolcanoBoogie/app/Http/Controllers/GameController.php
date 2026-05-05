@@ -28,9 +28,10 @@ class GameController extends Controller
         }
 
         $game = $activeGame::with([
-            'board.placedTiles.placedSubtiles'
+            'board.placedTiles.anchor',
+            'board.placedTiles.placedSubtiles',
         ])->first();
-        
+
         $tiles = Tile::all();
 
         return Inertia::render('play-game', [
