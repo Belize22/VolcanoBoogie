@@ -12,6 +12,7 @@ use App\Models\PlacedSubtile;
 use App\Models\Tile;
 use App\Enums\GameStatus;
 use App\Enums\PathType;
+use App\Enums\Property;
 use App\Enums\Rotation;
 use App\Enums\TileType;
 
@@ -58,8 +59,11 @@ class GameController extends Controller
                 'tile_id' => $tile->id,
             ]);
 
+            \Log::info($tile->id);
+            \Log::info($placedTile->id);
+            \Log::info($placedTile->tile_id);
 
-            $tileInstance = Tile::find($placedTile->get()->tile_id)->get();
+            $tileInstance = Tile::find($placedTile->tile_id);
 
             if ($tileInstance->tile_type === TileType::ENTRANCE) {
                 $anchor = PlacedSubtile::create([
@@ -80,7 +84,7 @@ class GameController extends Controller
                     'property' => Property::SAFE,
                     'is_neutralized' => false,
                 ]);
-                $placedTile->anchor = $anchor;
+                $placedTile->anchor = $anchor->id;
                 $placedTile->save();
             }
             else if ($tileInstance->tile_type === TileType::WEST_WING) {
@@ -111,7 +115,7 @@ class GameController extends Controller
                     'property' => Property::GUARDIAN,
                     'is_neutralized' => false,
                 ]);
-                $placedTile->anchor = $anchor;
+                $placedTile->anchor = $anchor->id;
                 $placedTile->save();
             }
             else if ($tileInstance->tile_type === TileType::EAST_WING) {
@@ -142,7 +146,7 @@ class GameController extends Controller
                     'property' => Property::GUARDIAN,
                     'is_neutralized' => false,
                 ]);
-                $placedTile->anchor = $anchor;
+                $placedTile->anchor = $anchor->id;
                 $placedTile->save();
             }
         }

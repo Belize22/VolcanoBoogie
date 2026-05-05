@@ -13,7 +13,7 @@ class PlacedTile extends Model
         return [
             'board_id' => 'integer',
             'tile_id' => 'integer',
-            'anchor' => PlacedSubtile::class,
+            'anchor' => 'integer',
         ];
     }
 }
