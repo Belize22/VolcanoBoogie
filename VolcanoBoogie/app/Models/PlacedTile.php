@@ -12,6 +12,8 @@ use App\Models\Board;
 #[Fillable(['board_id', 'tile_id'])]
 class PlacedTile extends Model
 {
+    protected $hidden = ['created_at', 'updated_at'];
+    
     public function board(): BelongsTo
     {
         return $this->belongsTo(Board::class);

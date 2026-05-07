@@ -7,6 +7,8 @@ use App\Enums\TileType;
 
 class Tile extends Model
 {
+    protected $hidden = ['created_at', 'updated_at'];
+    
     protected function casts(): array
     {
         return [

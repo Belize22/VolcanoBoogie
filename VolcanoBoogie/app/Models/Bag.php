@@ -12,6 +12,8 @@ use App\Models\Game;
 #[Fillable(['game_id'])]
 class Bag extends Model
 {    
+    protected $hidden = ['created_at', 'updated_at'];
+
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);

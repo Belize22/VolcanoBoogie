@@ -17,7 +17,7 @@ use App\Enums\Property;
 class PlacedSubtile extends Model
 {
     protected $appends = ['coordinate'];
-    protected $hidden = ['x_coordinate', 'y_coordinate'];
+    protected $hidden = ['x_coordinate', 'y_coordinate', 'created_at', 'updated_at'];
 
     public function placedTile(): BelongsTo
     {

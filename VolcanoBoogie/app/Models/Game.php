@@ -12,6 +12,8 @@ use App\Models\Board;
 #[Fillable(['status'])]
 class Game extends Model
 {
+    protected $hidden = ['created_at', 'updated_at'];
+    
     public function board(): HasOne
     {
         return $this->hasOne(Board::class);

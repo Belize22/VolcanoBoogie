@@ -10,6 +10,8 @@ use App\Models\Bag;
 #[Fillable(['bag_id', 'tile_id'])]
 class BaggedTile extends Model
 {
+    protected $hidden = ['created_at', 'updated_at'];
+    
     public function game(): BelongsTo
     {
         return $this->belongsTo(Bag::class);
