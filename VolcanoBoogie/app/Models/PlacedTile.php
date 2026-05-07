@@ -13,10 +13,15 @@ use App\Models\Board;
 class PlacedTile extends Model
 {
     protected $hidden = ['created_at', 'updated_at'];
-    
+
     public function board(): BelongsTo
     {
         return $this->belongsTo(Board::class);
+    }
+
+    public function tile(): BelongsTo
+    {
+        return $this->belongsTo(Tile::class);
     }
     
     public function placedSubtiles(): HasMany
