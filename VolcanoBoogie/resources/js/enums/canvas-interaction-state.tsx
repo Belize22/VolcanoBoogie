@@ -1,4 +1,4 @@
 export enum CanvasInteractionState {
-    GAME_INTERACTION,
-    MOVE_CANVAS
+    GAME_INTERACTION = "game_interaction",
+    MOVE_CANVAS = "move_canvas",
 };

@@ -1,5 +1,7 @@
-import { Tile } from '@/interfaces/tile'
+import { PlacedTile } from '@/interfaces/placed-tile';
 
 export interface Board {
-    tiles: Tile[]
+    game_id: number,
+    id: number,
+    placed_tiles: PlacedTile[]
 }

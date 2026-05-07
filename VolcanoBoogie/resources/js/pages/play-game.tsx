@@ -1,17 +1,21 @@
+import { PageProps } from '@inertiajs/core';
 import { Head, usePage } from '@inertiajs/react';
 import { useState, useRef } from 'react';
+import { Game } from '@/interfaces/game';
 import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
-import { Tile } from '@/interfaces/tile';
+import { PlacedTile } from '@/interfaces/placed-tile';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import Sidebar from '@/components/play-game/sidebar';
 import Footer from '@/components/play-game/footer';
 import GameCanvas from '@/components/play-game/game-canvas';
 
+interface PlayGameProps extends PageProps {
+    game: Game,
+}
+
 export default function PlayGame() {
-    const { game, tiles } = usePage().props;
-    console.log(game);
-    console.log(tiles);
+    const { game, tiles } = usePage<PlayGameProps>().props;
 
     const DEFAULT_CANVAS_CENTER: Coordinate = {x: 0, y: 0};
     const DEFAULT_ZOOM_FACTOR: number = 1;
@@ -25,19 +29,11 @@ export default function PlayGame() {
 
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const [board, setBoard] = useState<Board>({
-        tiles: [
-            {subtiles: [{coordinate: {x: 0, y: 0}, image: '4waysafe.png'}]},
-            {subtiles: [{coordinate: {x: -2, y: -2}, image: '4waysafe.png'}]}
-        ]
-    });
+    const [currentGame, setCurrentGame] = useState<Game>(game);
+    console.log(game)
 
     function placeTile(coordinate: Coordinate) {
-        const coordinates = board.tiles.flatMap(tile => tile.subtiles.flatMap(subtile => subtile.coordinate));
-        if (!coordinates.some(currentCoordinate => currentCoordinate.x === coordinate.x && currentCoordinate.y === coordinate.y)) {
-            const newTile: Tile = {subtiles: [{coordinate: coordinate, image: '4waysafe.png'}]}
-            setBoard({...board, tiles: [...board.tiles, newTile]})
-        }
+        //TO-DO: Transfer responsibility to back-end.
     }
     
     return (
@@ -45,7 +41,7 @@ export default function PlayGame() {
             <Head title="Play Game" />
             <div className="flex w-screen h-screen flex-1 flex-col gap-4 overflow-x-auto">
                 <GameCanvas
-                    board={board}
+                    board={currentGame.board}
                     canvasCenter={canvasCenter}
                     setCanvasCenter={setCanvasCenter}
                     zoomFactor={zoomFactor}
