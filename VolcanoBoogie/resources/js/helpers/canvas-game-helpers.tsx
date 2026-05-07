@@ -27,7 +27,7 @@ export function drawTiles(
                     context.drawImage(
                         image, 
                         (canvas.width/2 - adjustedTileSize/2) + canvasCenter.x + (subtile.coordinate.x * adjustedTileSize), 
-                        (canvas.height/2 - adjustedTileSize/2) + canvasCenter.y + (subtile.coordinate.y * adjustedTileSize),
+                        (canvas.height/2 - adjustedTileSize/2) + canvasCenter.y + (-subtile.coordinate.y * adjustedTileSize),
                         image.naturalWidth * zoomFactor,
                         image.naturalHeight * zoomFactor
                     )
