@@ -40,7 +40,7 @@ export default function PlayGame() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({coordinate: coordinate})
+            body: JSON.stringify({boardId: game.board.id, coordinate: coordinate})
         });
     }
     

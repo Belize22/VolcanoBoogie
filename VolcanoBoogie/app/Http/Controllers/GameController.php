@@ -40,7 +40,31 @@ class GameController extends Controller
 
     public function placeTile(Request $request)
     {
-        \Log::info($request);
+        //Sanctum must be placed last.
+        $selectedTile = BaggedTile::inRandomOrder()
+            ->whereNot('id', Tile::where('tile_type', TileType::SANCTUM)->first())
+            ->first();
+        $this->placeTileAndSubtileOnBoard($selectedTile, $request->boardId, $request->coordinate);
+    }
+
+    private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, array $coordinate) {
+        //Place tile on board.
+        $placedTile = PlacedTile::create([
+            'board_id' => $boardId,
+            'tile_id' => $baggedTile->tile_id,
+        ]);
+        PlacedSubtile::create([
+            'placed_tile_id' => $placedTile->id,
+            'x_coordinate' => $coordinate["x"],
+            'y_coordinate' => $coordinate["y"],
+            'path_type' => PathType::FOUR_WAY,
+            'rotation' => Rotation::NORTH,
+            'property' => Property::SAFE,
+            'is_neutralized' => false,
+        ]);
+
+        //Indicate that tile is removed from bag.
+        $baggedTile->delete();
     }
 
     private function createGame()
