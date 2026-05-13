@@ -38,6 +38,11 @@ class GameController extends Controller
         ]);
     }
 
+    public function placeTile(Request $request)
+    {
+        \Log::info($request);
+    }
+
     private function createGame()
     {
         $game = Game::create([

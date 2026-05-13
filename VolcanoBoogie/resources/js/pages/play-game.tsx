@@ -34,6 +34,14 @@ export default function PlayGame() {
 
     function placeTile(coordinate: Coordinate) {
         //TO-DO: Transfer responsibility to back-end.
+        fetch('/api/place-tile', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({coordinate: coordinate})
+        });
     }
     
     return (
