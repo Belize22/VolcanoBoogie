@@ -47,6 +47,13 @@ class GameController extends Controller
             ], 409);
         }
 
+        if ($this->spaceIsOccupied($request->coordinate)) {
+            return response()->json([
+                'error' => 'Improper tile placement!',
+                'message' => 'Space is already occupied by another tile!',
+            ], 409);
+        }
+
         if ($this->tileOutOfBounds($request->coordinate)) {
             return response()->json([
                 'error' => 'Improper tile placement!',
@@ -260,6 +267,15 @@ class GameController extends Controller
 
         //Indicate that sanctum is placed.
         $sanctum->delete();
+    }
+
+    private function spaceIsOccupied($coordinate)
+    {
+        $existingSubtile = PlacedSubtile::where('x_coordinate', $coordinate["x"])
+            ->where('y_coordinate', $coordinate["y"])
+            ->count();
+
+        return $existingSubtile > 0;
     }
 
     private function tileOutOfBounds($coordinate)
