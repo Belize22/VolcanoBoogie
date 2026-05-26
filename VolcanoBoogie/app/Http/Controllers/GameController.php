@@ -61,6 +61,13 @@ class GameController extends Controller
             ], 409);
         }
 
+        if ($this->tileCannotConnectToAnother($request->coordinate)) {
+            return response()->json([
+                'error' => 'Improper tile placement!',
+                'message' => 'Tile is unable to connect to another tile from here!',
+            ], 409);
+        }
+
         //Sanctum must be placed last.
         $selectedTile = BaggedTile::inRandomOrder()
             ->whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
@@ -292,6 +299,21 @@ class GameController extends Controller
         $minY = $wingSubtiles->min('y_coordinate');
 
         return ($coordinate["x"] < $minX || $coordinate["x"] > $maxX || $coordinate["y"] < $minY);
+    }
+
+    private function tileCannotConnectToAnother($coordinate)
+    {
+        //Adjacent subtiles for cardinal directions only!
+        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate) {
+            $query->whereIn('x_coordinate', [$coordinate["x"] - 1, $coordinate["x"], $coordinate["x"] + 1])
+                ->where('y_coordinate', $coordinate["y"]);
+        })
+        ->orWhere(function ($query) use ($coordinate) {
+            $query->whereIn('y_coordinate', [$coordinate["y"] - 1, $coordinate["y"], $coordinate["y"] + 1])
+                ->where('x_coordinate', $coordinate["x"]);
+        })->get();
+
+        return $subtileCandidates->count() === 0;
     }
 
     private function isBagEmpty()
