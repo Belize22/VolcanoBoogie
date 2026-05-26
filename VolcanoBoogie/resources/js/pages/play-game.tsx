@@ -41,6 +41,15 @@ export default function PlayGame() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({boardId: game.board.id, coordinate: coordinate})
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                setCurrentGame(data.game);
+            }
+            else if (data.error) {
+                console.log(data);
+            }
         });
     }
     

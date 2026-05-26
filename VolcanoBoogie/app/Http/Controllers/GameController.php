@@ -40,11 +40,34 @@ class GameController extends Controller
 
     public function placeTile(Request $request)
     {
+        if ($this->isBagEmpty()) {
+            return response()->json([
+                'error' => 'Bag is empty!',
+                'message' => 'All tiles have been placed on the board!',
+            ], 409);
+        }
+
         //Sanctum must be placed last.
         $selectedTile = BaggedTile::inRandomOrder()
-            ->whereNot('id', Tile::where('tile_type', TileType::SANCTUM)->first())
+            ->whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
             ->first();
         $this->placeTileAndSubtileOnBoard($selectedTile, $request->boardId, $request->coordinate);
+
+        if ($this->isOnlySanctumRemaining()) {
+            $this->placeSanctum($request->boardId);
+        }
+
+        $activeGame = $this->getActiveGame()::with([
+            'board.placedTiles.anchor',
+            'board.placedTiles.tile',
+            'board.placedTiles.placedSubtiles',
+        ])->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Board has been returned',
+            'game' => $activeGame,
+        ], 200);
     }
 
     private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, array $coordinate) {
@@ -196,5 +219,53 @@ class GameController extends Controller
     {
         $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
         return $game;
+    }
+
+    private function placeSanctum(int $boardId)
+    {
+        //First is a stop gap until UI to choose a sanctum location is implemented!
+        $furthestSubtile = PlacedSubtile::where('y_coordinate', PlacedSubtile::max('y_coordinate'))->first();
+        $sanctum = BaggedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->first();
+
+        //Place tile on board.
+        $placedTile = PlacedTile::create([
+            'board_id' => $boardId,
+            'tile_id' => $sanctum->tile_id,
+        ]);
+        PlacedSubtile::create([
+            'placed_tile_id' => $placedTile->id,
+            'x_coordinate' => $furthestSubtile->coordinate->x,
+            'y_coordinate' => $furthestSubtile->coordinate->y + 1,
+            'path_type' => PathType::STRAIGHT,
+            'rotation' => Rotation::NORTH,
+            'property' => Property::SAFE,
+            'is_neutralized' => false,
+        ]);
+        PlacedSubtile::create([
+            'placed_tile_id' => $placedTile->id,
+            'x_coordinate' => $furthestSubtile->coordinate->x,
+            'y_coordinate' => $furthestSubtile->coordinate->y + 2,
+            'path_type' => PathType::DEAD_END,
+            'rotation' => Rotation::SOUTH,
+            'property' => Property::SAFE,
+            'is_neutralized' => false,
+        ]);
+
+        //Indicate that sanctum is placed.
+        $sanctum->delete();
+    }
+
+    private function isBagEmpty()
+    {
+        $tileCount = BaggedTile::whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->count();
+        return $tileCount === 0;
+    }
+
+    private function isOnlySanctumRemaining()
+    {
+        $noSanctumTileCount = BaggedTile::whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->count();
+        $totalTileCount = BaggedTile::count();
+
+        return ($totalTileCount === 1 && $noSanctumTileCount === 0);
     }
 }
