@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Classes\Coordinate;
 use App\Models\Bag;
 use App\Models\Game;
 use App\Models\Board;
@@ -101,7 +102,7 @@ class GameController extends Controller
             'placed_tile_id' => $placedTile->id,
             'x_coordinate' => $coordinate["x"],
             'y_coordinate' => $coordinate["y"],
-            'path_type' => PathType::FOUR_WAY,
+            'path_type' => TileType::tileTypeToPathType(Tile::where('id', $placedTile->tile_id)->first()->tile_type),
             'rotation' => Rotation::NORTH,
             'property' => Property::SAFE,
             'is_neutralized' => false,
@@ -303,17 +304,38 @@ class GameController extends Controller
 
     private function tileCannotConnectToAnother($coordinate)
     {
-        //Adjacent subtiles for cardinal directions only!
+        //Adjacent subtiles for cardinal directions only! Also don't include the initial tile being compared to.
         $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate) {
-            $query->whereIn('x_coordinate', [$coordinate["x"] - 1, $coordinate["x"], $coordinate["x"] + 1])
+            $query->whereIn('x_coordinate', [$coordinate["x"] - 1, $coordinate["x"] + 1])
                 ->where('y_coordinate', $coordinate["y"]);
         })
         ->orWhere(function ($query) use ($coordinate) {
-            $query->whereIn('y_coordinate', [$coordinate["y"] - 1, $coordinate["y"], $coordinate["y"] + 1])
+            $query->whereIn('y_coordinate', [$coordinate["y"] - 1, $coordinate["y"] + 1])
                 ->where('x_coordinate', $coordinate["x"]);
         })->get();
 
-        return $subtileCandidates->count() === 0;
+        //Nothing adjacent, cannot connect!
+        if ($subtileCandidates->count() === 0) {
+            return true;
+        }
+
+        //Go through all adjacent subtile candidates and check if there is an open passage
+        //to the space we want to place a new tile on.
+        foreach($subtileCandidates as $subtile) {
+            //Get direction where current adjacent tile is
+            $relativeDirection = Rotation::getDirectionRelativeToCoordinates(
+                new Coordinate($coordinate["x"], $coordinate["y"]), $subtile->coordinate
+            );
+            $adjacencies = Rotation::getAdjacencies($subtile->rotation, $subtile->path_type);
+
+            //Verify that the adjacent tile has an opening to the spot we want to place a tile on.
+            if (in_array(Rotation::flip($relativeDirection), $adjacencies)) {
+                return false;
+            }
+        }
+
+        //No openings found for any of the adjacent tiles.
+        return true;
     }
 
     private function isBagEmpty()
