@@ -47,6 +47,13 @@ class GameController extends Controller
             ], 409);
         }
 
+        if ($this->tileOutOfBounds($request->coordinate)) {
+            return response()->json([
+                'error' => 'Improper tile placement!',
+                'message' => 'Tile placement is not within the bounds of the board!',
+            ], 409);
+        }
+
         //Sanctum must be placed last.
         $selectedTile = BaggedTile::inRandomOrder()
             ->whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
@@ -253,6 +260,22 @@ class GameController extends Controller
 
         //Indicate that sanctum is placed.
         $sanctum->delete();
+    }
+
+    private function tileOutOfBounds($coordinate)
+    {
+        //West and east wing tiles act as basis of board boundaries!
+        $wingSubtiles = PlacedSubtile::whereIn(
+            'placed_tile_id', PlacedTile::whereIn(
+                'tile_id', Tile::whereIn('tile_type', [TileType::WEST_WING, TileType::EAST_WING])->get()->pluck('id')
+            )->get()->pluck('id')
+        )->get();
+
+        $minX = $wingSubtiles->min('x_coordinate');
+        $maxX = $wingSubtiles->max('x_coordinate');
+        $minY = $wingSubtiles->min('y_coordinate');
+
+        return ($coordinate["x"] < $minX || $coordinate["x"] > $maxX || $coordinate["y"] < $minY);
     }
 
     private function isBagEmpty()
