@@ -95,7 +95,7 @@ export function convertCanvasCoordinatesToTileCoordinates(
         const x = Math.floor((posX - (canvas.width/2 - adjustedTileSize/2) - canvasCenter.x)/adjustedTileSize);
         const y = Math.floor((posY - (canvas.height/2 - adjustedTileSize/2) - canvasCenter.y)/adjustedTileSize);
 
-        return {x: x, y: y};
+        return {x: x, y: -y};
     }
     return null;
 }
