@@ -304,6 +304,11 @@ class GameController extends Controller
 
     private function tileCannotConnectToAnother($coordinate)
     {
+        return empty($this->retrieveAllValidDirections($coordinate));
+    }
+
+    private function retrieveAllValidDirections($coordinate)
+    {
         //Adjacent subtiles for cardinal directions only! Also don't include the initial tile being compared to.
         $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate) {
             $query->whereIn('x_coordinate', [$coordinate["x"] - 1, $coordinate["x"] + 1])
@@ -316,8 +321,10 @@ class GameController extends Controller
 
         //Nothing adjacent, cannot connect!
         if ($subtileCandidates->count() === 0) {
-            return true;
+            return [];
         }
+
+        $validDirections = [];
 
         //Go through all adjacent subtile candidates and check if there is an open passage
         //to the space we want to place a new tile on.
@@ -330,12 +337,11 @@ class GameController extends Controller
 
             //Verify that the adjacent tile has an opening to the spot we want to place a tile on.
             if (in_array(Rotation::flip($relativeDirection), $adjacencies)) {
-                return false;
+                array_push($validDirections, $relativeDirection);
             }
         }
 
-        //No openings found for any of the adjacent tiles.
-        return true;
+        return $validDirections;
     }
 
     private function isBagEmpty()
