@@ -93,6 +93,12 @@ class GameController extends Controller
     }
 
     private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, array $coordinate) {
+        $adjacencies = $this->retrieveAllValidDirections($coordinate);
+
+        if (empty($adjacencies)) {
+            return;
+        }
+
         //Place tile on board.
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
@@ -103,7 +109,7 @@ class GameController extends Controller
             'x_coordinate' => $coordinate["x"],
             'y_coordinate' => $coordinate["y"],
             'path_type' => TileType::tileTypeToPathType(Tile::where('id', $placedTile->tile_id)->first()->tile_type),
-            'rotation' => Rotation::NORTH,
+            'rotation' => $adjacencies[0],
             'property' => Property::SAFE,
             'is_neutralized' => false,
         ]);
