@@ -12,6 +12,7 @@ use App\Models\BaggedTile;
 use App\Models\PlacedTile;
 use App\Models\PlacedSubtile;
 use App\Models\Tile;
+use App\Enums\GameState;
 use App\Enums\GameStatus;
 use App\Enums\PathType;
 use App\Enums\PlacementStatus;
@@ -118,6 +119,12 @@ class GameController extends Controller
             'is_neutralized' => false,
         ]);
 
+        if ($placedTile->placement_status === PlacementStatus::PENDING) {
+            $activeGame = $this->getActiveGame();
+            $activeGame->game_state = GameState::ROTATING_TILE;
+            $activeGame->save();
+        }
+
         //Indicate that tile is removed from bag.
         $baggedTile->delete();
     }
@@ -126,6 +133,7 @@ class GameController extends Controller
     {
         $game = Game::create([
             'status' => GameStatus::IN_PROGRESS,
+            'state' => GameState::PLACING_TILE,
         ]);
 
         $board = Board::create([

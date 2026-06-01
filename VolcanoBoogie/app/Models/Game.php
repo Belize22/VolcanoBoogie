@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Enums\GameState;
 use App\Enums\GameStatus;
 use App\Models\Bag;
 use App\Models\Board;
 
-#[Fillable(['status'])]
+#[Fillable(['status', 'game_state'])]
 class Game extends Model
 {
     protected $hidden = ['created_at', 'updated_at'];
@@ -28,6 +29,7 @@ class Game extends Model
     {
         return [
             'status' => GameStatus::class,
+            'game_state' => GameState::class,
         ];
     }
 }
