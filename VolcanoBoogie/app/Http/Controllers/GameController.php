@@ -14,6 +14,7 @@ use App\Models\PlacedSubtile;
 use App\Models\Tile;
 use App\Enums\GameStatus;
 use App\Enums\PathType;
+use App\Enums\PlacementStatus;
 use App\Enums\Property;
 use App\Enums\Rotation;
 use App\Enums\TileType;
@@ -93,23 +94,26 @@ class GameController extends Controller
     }
 
     private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, array $coordinate) {
-        $adjacencies = $this->retrieveAllValidDirections($coordinate);
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
 
-        if (empty($adjacencies)) {
+        if (empty($connectedAdjacencies)) {
             return;
         }
+
+        $availableAdjacencies = $this->retrieveAllAvailableDirections($coordinate);
 
         //Place tile on board.
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
             'tile_id' => $baggedTile->tile_id,
+            'placement_status' => count($availableAdjacencies) > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED,
         ]);
         PlacedSubtile::create([
             'placed_tile_id' => $placedTile->id,
             'x_coordinate' => $coordinate["x"],
             'y_coordinate' => $coordinate["y"],
             'path_type' => TileType::tileTypeToPathType(Tile::where('id', $placedTile->tile_id)->first()->tile_type),
-            'rotation' => $adjacencies[0],
+            'rotation' => $connectedAdjacencies[0],
             'property' => Property::SAFE,
             'is_neutralized' => false,
         ]);
@@ -150,6 +154,7 @@ class GameController extends Controller
             $placedTile = PlacedTile::create([
                 'board_id' => $board->id,
                 'tile_id' => $tile->id,
+                'placement_status' => PlacementStatus::PLACED,
             ]);
 
             $tileInstance = Tile::find($placedTile->tile_id);
@@ -259,6 +264,7 @@ class GameController extends Controller
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
             'tile_id' => $sanctum->tile_id,
+            'placement_status' => PlacementStatus::PLACED,
         ]);
         PlacedSubtile::create([
             'placed_tile_id' => $placedTile->id,
@@ -310,20 +316,12 @@ class GameController extends Controller
 
     private function tileCannotConnectToAnother($coordinate)
     {
-        return empty($this->retrieveAllValidDirections($coordinate));
+        return empty($this->retrieveAllConnectingDirections($coordinate));
     }
 
-    private function retrieveAllValidDirections($coordinate)
+    private function retrieveAllConnectingDirections($coordinate)
     {
-        //Adjacent subtiles for cardinal directions only! Also don't include the initial tile being compared to.
-        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate) {
-            $query->whereIn('x_coordinate', [$coordinate["x"] - 1, $coordinate["x"] + 1])
-                ->where('y_coordinate', $coordinate["y"]);
-        })
-        ->orWhere(function ($query) use ($coordinate) {
-            $query->whereIn('y_coordinate', [$coordinate["y"] - 1, $coordinate["y"] + 1])
-                ->where('x_coordinate', $coordinate["x"]);
-        })->get();
+        $subtileCandidates = $this->retrieveAdjacentSubtileCandidates($coordinate);
 
         //Nothing adjacent, cannot connect!
         if ($subtileCandidates->count() === 0) {
@@ -348,6 +346,43 @@ class GameController extends Controller
         }
 
         return $validDirections;
+    }
+
+    private function retrieveAllAvailableDirections($coordinate)
+    {
+        $subtileCandidates = $this->retrieveAdjacentSubtileCandidates($coordinate);
+        $validDirections = [];
+
+        //Get directions of all adjacent subtiles.
+        foreach($subtileCandidates as $subtile) {
+            $relativeDirection = Rotation::getDirectionRelativeToCoordinates(
+                new Coordinate($coordinate["x"], $coordinate["y"]), $subtile->coordinate
+            );
+            array_push($validDirections, $relativeDirection);
+        }
+
+        //Get directions of all available spots by providing the directions that
+        //aren't part of adjacent subtiles.
+        return array_udiff(
+            [Rotation::NORTH, Rotation::EAST, Rotation::SOUTH, Rotation::WEST],
+            $validDirections, 
+            fn($dir1, $dir2) => $dir1->value <=> $dir2->value
+        );
+    }
+
+    private function retrieveAdjacentSubtileCandidates($coordinate)
+    {
+        //Adjacent subtiles for cardinal directions only! Also don't include the initial tile being compared to.
+        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate) {
+            $query->whereIn('x_coordinate', [$coordinate["x"] - 1, $coordinate["x"] + 1])
+                ->where('y_coordinate', $coordinate["y"]);
+        })
+        ->orWhere(function ($query) use ($coordinate) {
+            $query->whereIn('y_coordinate', [$coordinate["y"] - 1, $coordinate["y"] + 1])
+                ->where('x_coordinate', $coordinate["x"]);
+        })->get();
+
+        return $subtileCandidates;
     }
 
     private function isBagEmpty()

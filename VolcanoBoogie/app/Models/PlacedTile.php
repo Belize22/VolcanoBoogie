@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\Board;
+use App\Enums\PlacementStatus;
 
-#[Fillable(['board_id', 'tile_id'])]
+#[Fillable(['board_id', 'tile_id', 'placement_status'])]
 class PlacedTile extends Model
 {
     protected $hidden = ['created_at', 'updated_at'];
@@ -39,6 +40,7 @@ class PlacedTile extends Model
         return [
             'board_id' => 'integer',
             'tile_id' => 'integer',
+            'placement_status' => PlacementStatus::class,
             'anchor' => 'array',
         ];
     }
