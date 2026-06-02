@@ -101,6 +101,22 @@ class GameController extends Controller
         ], 200);
     }
 
+    public function confirmTileRotation(Request $request) {
+        \Log::info($request);
+
+        $activeGame = $this->getActiveGame()::with([
+            'board.placedTiles.anchor',
+            'board.placedTiles.tile',
+            'board.placedTiles.placedSubtiles',
+        ])->first();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'API call returns response!',
+            'game' => $activeGame,
+        ], 200);
+    }
+
     private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, array $coordinate) {
         $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
 

@@ -13,6 +13,7 @@ type Props = {
     defaultZoomFactor: number;
     canvasInteractionState: CanvasInteractionState;
     setCanvasInteractionState: Dispatch<SetStateAction<CanvasInteractionState>>;
+    confirmTileRotation: () => void;
     rotateTile: (isClockwise: boolean) => void;
     gameState: GameState;
 };
@@ -25,6 +26,7 @@ export default function Sidebar({
     defaultZoomFactor,
     canvasInteractionState,
     setCanvasInteractionState,
+    confirmTileRotation,
     rotateTile,
     gameState
 }: Props) {
@@ -41,6 +43,7 @@ export default function Sidebar({
             />
             {gameState === GameState.ROTATING_TILE && 
                 <RotationPane
+                    confirmTileRotation={confirmTileRotation}
                     rotateTile={rotateTile}
                 />
             }

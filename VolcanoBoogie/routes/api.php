@@ -6,6 +6,7 @@ use App\Http\Controllers\GameController;
 
 
 Route::post('/place-tile', [GameController::class, 'placeTile'])->name('place-tile');
+Route::post('/confirm-tile-rotation', [GameController::class, 'confirmTileRotation'])->name('confirm-tile-rotation');
 
 Route::get('/user', function (Request $request) {
     return $request->user();

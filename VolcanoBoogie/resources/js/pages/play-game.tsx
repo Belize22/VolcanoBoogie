@@ -52,6 +52,31 @@ export default function PlayGame() {
         });
     }
 
+    function confirmTileRotation() {
+        fetch('/api/confirm-tile-rotation', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                boardId: currentGame.board.id, 
+                pendingTiles: currentGame.board.placed_tiles.filter(
+                    placed_tile => placed_tile.placement_status === PlacementStatus.PENDING
+                )
+            })
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                console.log(data);
+            }
+            else if (data.error) {
+                console.log(data);
+            }
+        });
+    }
+
     function rotateTile(isClockwise: boolean) {
         const previousGame = currentGame;
         const placedTiles = currentGame.board.placed_tiles;
@@ -102,6 +127,7 @@ export default function PlayGame() {
                     defaultZoomFactor={DEFAULT_ZOOM_FACTOR}
                     canvasInteractionState={canvasInteractionState}
                     setCanvasInteractionState={setCanvasInteractionState}
+                    confirmTileRotation={confirmTileRotation}
                     rotateTile={rotateTile}
                     gameState={currentGame.game_state}
                 />
