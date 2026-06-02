@@ -2,10 +2,10 @@ import { PageProps } from '@inertiajs/core';
 import { Head, usePage } from '@inertiajs/react';
 import { useState, useRef } from 'react';
 import { Game } from '@/interfaces/game';
-import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
-import { PlacedTile } from '@/interfaces/placed-tile';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
+import { PlacementStatus } from '@/enums/placement-status';
+import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/rotation-helpers';
 import Sidebar from '@/components/play-game/sidebar';
 import Footer from '@/components/play-game/footer';
 import GameCanvas from '@/components/play-game/game-canvas';
@@ -30,7 +30,7 @@ export default function PlayGame() {
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
-    console.log(currentGame)
+    console.log(currentGame);
 
     function placeTile(coordinate: Coordinate) {
         fetch('/api/place-tile', {
@@ -50,6 +50,32 @@ export default function PlayGame() {
                 console.log(data);
             }
         });
+    }
+
+    function rotateTile(isClockwise: boolean) {
+        const previousGame = currentGame;
+        const placedTiles = currentGame.board.placed_tiles;
+
+        //Should only be one pending tile but iterate through all possibilities for robustness.
+        for (let i = 0; i < placedTiles.length; i++) {
+            //Avoid filtering since we need access to all placed tiles to update
+            //currentGame in an immutable fashion.
+            if (placedTiles[i].placement_status === PlacementStatus.PENDING) {
+                placedTiles[i].placed_subtiles[0].rotation = convertNumericToRotation(
+                    (convertRotationToNumeric(placedTiles[i].placed_subtiles[0].rotation) + (isClockwise ? 1 : -1)) % 4
+                )
+            }
+        }
+
+        setCurrentGame(
+            {
+                ...previousGame,
+                board: {
+                    ...previousGame.board,
+                    placed_tiles: placedTiles
+                }
+            }
+        )
     }
     
     return (
@@ -76,6 +102,7 @@ export default function PlayGame() {
                     defaultZoomFactor={DEFAULT_ZOOM_FACTOR}
                     canvasInteractionState={canvasInteractionState}
                     setCanvasInteractionState={setCanvasInteractionState}
+                    rotateTile={rotateTile}
                     gameState={currentGame.game_state}
                 />
             </div>

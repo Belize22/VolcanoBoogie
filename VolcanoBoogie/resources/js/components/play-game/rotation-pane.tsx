@@ -1,9 +1,11 @@
 import { RotateCcw, RotateCw, Check } from 'lucide-react'
 
 type Props = {
+    rotateTile: (isClockwise: boolean) => void;
 };
 
 export default function RotationPane({
+    rotateTile
 }: Props) {
     const ROTATION_BUTTON_STYLE = "mx-1 bg-stone-400 rounded-xl size-8 hover:scale-110";
     const CONFIRMATION_BUTTON_STYLE = "mx-1 bg-green-400 rounded-xl size-8 hover:scale-110";
@@ -14,11 +16,13 @@ export default function RotationPane({
             <button className={ROTATION_BUTTON_STYLE}>
                 <RotateCcw
                     className={ICON_STYLE}
+                    onClick={() => rotateTile(false)}
                 />
             </button>
             <button className={ROTATION_BUTTON_STYLE}>
                 <RotateCw
                     className={ICON_STYLE}
+                    onClick={() => rotateTile(true)}
                 />
             </button>
             <button className={CONFIRMATION_BUTTON_STYLE}>
