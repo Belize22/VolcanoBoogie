@@ -43,6 +43,13 @@ class GameController extends Controller
 
     public function placeTile(Request $request)
     {
+        if ($this->getActiveGame()->game_state !== GameState::PLACING_TILE) {
+            return response()->json([
+                'error' => 'Cannot place tile!',
+                'message' => 'Must resolve other actions before placing more tiles!',
+            ], 409);
+        }
+
         if ($this->isBagEmpty()) {
             return response()->json([
                 'error' => 'Bag is empty!',
