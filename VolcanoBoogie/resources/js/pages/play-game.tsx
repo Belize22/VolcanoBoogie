@@ -76,6 +76,7 @@ export default function PlayGame() {
                     defaultZoomFactor={DEFAULT_ZOOM_FACTOR}
                     canvasInteractionState={canvasInteractionState}
                     setCanvasInteractionState={setCanvasInteractionState}
+                    gameState={currentGame.game_state}
                 />
             </div>
         </>

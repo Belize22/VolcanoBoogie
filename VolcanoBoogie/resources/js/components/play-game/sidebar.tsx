@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction } from 'react';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
+import { GameState } from '@/enums/game-state';
 import ControlPane from '@/components/play-game/control-pane';
+import RotationPane from '@/components/play-game/rotation-pane';
 
 type Props = {
     setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
@@ -11,6 +13,7 @@ type Props = {
     defaultZoomFactor: number;
     canvasInteractionState: CanvasInteractionState;
     setCanvasInteractionState: Dispatch<SetStateAction<CanvasInteractionState>>;
+    gameState: GameState;
 };
 
 export default function Sidebar({
@@ -20,7 +23,8 @@ export default function Sidebar({
     setZoomFactor,
     defaultZoomFactor,
     canvasInteractionState,
-    setCanvasInteractionState
+    setCanvasInteractionState,
+    gameState
 }: Props) {
     return (
         <div className="fixed inset-y-0 right-0 w-2/10 bg-stone-900 border-l shadow-lg">
@@ -33,6 +37,9 @@ export default function Sidebar({
                 canvasInteractionState={canvasInteractionState}
                 setCanvasInteractionState={setCanvasInteractionState}
             />
+            {gameState === GameState.ROTATING_TILE && 
+                <RotationPane/>
+            }
         </div>
     );
 }

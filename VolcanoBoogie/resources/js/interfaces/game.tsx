@@ -6,5 +6,5 @@ export interface Game {
     board: Board,
     id: number,
     status: GameStatus,
-    state: GameState,
+    game_state: GameState,
 }
