@@ -1,5 +1,6 @@
 import { Coordinate } from '@/interfaces/coordinate';
 import { PlacedTile } from '@/interfaces/placed-tile';
+import { retrieveTileCenter } from '@/helpers/tile-helpers';
 
 export function clearCanvas(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
@@ -97,20 +98,12 @@ export function applyShadowOverlay(
 
         //Should only be one pending tile but iterate through all possibilities for robustness.
         for (let i = 0; i < pendingTiles.length; i++) {
-            //Get only coordinates of all subtiles for tile.
-            const subtileCoordinates = pendingTiles[i].placed_subtiles.map(({ coordinate, ...fields}) => coordinate);
-
-            //Since draw function for image always takes top and left as placement coordinates.
-            const topLeftmostCoordinate = subtileCoordinates.reduce((prevCoord, currentCoord) => 
-                currentCoord.x < prevCoord.x ? currentCoord : (currentCoord.y > prevCoord.y ? currentCoord : prevCoord)
-            );
-
-            const tileCenterX = (canvas.width/2 - adjustedTileSize/2) 
-                    + canvasCenter.x + (topLeftmostCoordinate.x * adjustedTileSize) 
-                    + adjustedTileSize/2;
-            const tileCenterY = (canvas.height/2 - adjustedTileSize/2) 
-                    + canvasCenter.y + (-topLeftmostCoordinate.y * adjustedTileSize) 
-                    + adjustedTileSize/2
+            const {tileCenterX, tileCenterY} = retrieveTileCenter(
+                canvas,
+                pendingTiles[i].placed_subtiles,
+                canvasCenter,
+                adjustedTileSize
+            )
 
             context.translate(tileCenterX,tileCenterY); //Make center of tile the pivot point of rotation.
             context.clearRect(
@@ -119,6 +112,9 @@ export function applyShadowOverlay(
                 adjustedTileSize,
                 adjustedTileSize
             )
+
+            //Translation must be isolated at the scope of a tile placement.
+            //Otherwise context adds up and tiles are placed weirdly.
             context.translate(-tileCenterX, -tileCenterY);
             context.restore();
         }

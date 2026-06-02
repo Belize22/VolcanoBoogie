@@ -49,7 +49,12 @@ export default function GameCanvas({
     function renderCanvasElements() {
         resizeCanvases();
         if (gameCanvasRef.current !== null) {
-            drawTiles(gameCanvasRef.current, board, TILE_SIZE, canvasCenter, zoomFactor);
+            drawTiles(
+                gameCanvasRef.current, 
+                board.placed_tiles, TILE_SIZE, 
+                canvasCenter, 
+                zoomFactor
+            );
         }
 
         if (uiOverlayRef.current !== null) {
