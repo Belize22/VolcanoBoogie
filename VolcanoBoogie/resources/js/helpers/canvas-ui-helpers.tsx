@@ -1,4 +1,5 @@
-import { Coordinate } from '@/interfaces/coordinate'
+import { Coordinate } from '@/interfaces/coordinate';
+import { PlacedTile } from '@/interfaces/placed-tile';
 
 export function clearCanvas(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
@@ -76,6 +77,51 @@ export function highlightCurrentTile(
 
         //Add by width offset to ensure highlighted square fits grid tile.
         context.fillRect(x + WIDTH_OFFSET, y + HEIGHT_OFFSET, adjustedTileSize, adjustedTileSize);
+    }
+}
+
+export function applyShadowOverlay(
+    canvas: HTMLCanvasElement, 
+    pendingTiles: PlacedTile[],
+    tileSize: number,
+    canvasCenter: Coordinate,
+    zoomFactor: number
+) {
+    const context = canvas.getContext("2d");
+    if (context) {
+        context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        console.log(pendingTiles);
+
+        const adjustedTileSize = tileSize * zoomFactor;
+
+        //Should only be one pending tile but iterate through all possibilities for robustness.
+        for (let i = 0; i < pendingTiles.length; i++) {
+            //Get only coordinates of all subtiles for tile.
+            const subtileCoordinates = pendingTiles[i].placed_subtiles.map(({ coordinate, ...fields}) => coordinate);
+
+            //Since draw function for image always takes top and left as placement coordinates.
+            const topLeftmostCoordinate = subtileCoordinates.reduce((prevCoord, currentCoord) => 
+                currentCoord.x < prevCoord.x ? currentCoord : (currentCoord.y > prevCoord.y ? currentCoord : prevCoord)
+            );
+
+            const tileCenterX = (canvas.width/2 - adjustedTileSize/2) 
+                    + canvasCenter.x + (topLeftmostCoordinate.x * adjustedTileSize) 
+                    + adjustedTileSize/2;
+            const tileCenterY = (canvas.height/2 - adjustedTileSize/2) 
+                    + canvasCenter.y + (-topLeftmostCoordinate.y * adjustedTileSize) 
+                    + adjustedTileSize/2
+
+            context.translate(tileCenterX,tileCenterY); //Make center of tile the pivot point of rotation.
+            context.clearRect(
+                -adjustedTileSize/2, //Conversion from center defined square to top-left defined square.
+                -adjustedTileSize/2,
+                adjustedTileSize,
+                adjustedTileSize
+            )
+            context.translate(-tileCenterX, -tileCenterY);
+            context.restore();
+        }
     }
 }
 

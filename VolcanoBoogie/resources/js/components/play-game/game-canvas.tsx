@@ -3,9 +3,16 @@ import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { GameState } from '@/enums/game-state';
+import { PlacementStatus } from '@/enums/placement-status';
 import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers';
 import { drawTiles } from '@/helpers/canvas-game-helpers';
-import { clearCanvas, highlightCurrentTile, convertCanvasCoordinatesToTileCoordinates, drawGrid } from '@/helpers/canvas-ui-helpers';
+import { 
+    clearCanvas, 
+    highlightCurrentTile, 
+    convertCanvasCoordinatesToTileCoordinates, 
+    drawGrid,
+    applyShadowOverlay
+} from '@/helpers/canvas-ui-helpers';
 
 type Props = {
     board: Board;
@@ -46,11 +53,17 @@ export default function GameCanvas({
         }
 
         if (uiOverlayRef.current !== null) {
+            if (gameState === GameState.ROTATING_TILE) {
+                applyShadowOverlay(
+                    uiOverlayRef.current,
+                    board.placed_tiles.filter(placed_tile => placed_tile.placement_status === PlacementStatus.PENDING),
+                    TILE_SIZE,
+                    canvasCenter,
+                    zoomFactor
+                );
+            }
             drawGrid(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor);
         }
-
-        //TO-DO: Draw a shadow over the canvas outside the current tile being rotated when
-        //the game state is rotating_tile.
     }
 
     function handleMouseDown(event: MouseEvent) {
@@ -99,6 +112,15 @@ export default function GameCanvas({
                 clearCanvas(canvas);
                 if (gameState === GameState.PLACING_TILE) {
                     highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter, zoomFactor);
+                }
+                else if (gameState === GameState.ROTATING_TILE) {
+                    applyShadowOverlay(
+                        uiOverlayRef.current,
+                        board.placed_tiles.filter(placed_tile => placed_tile.placement_status === PlacementStatus.PENDING),
+                        TILE_SIZE,
+                        canvasCenter,
+                        zoomFactor
+                    );
                 }
                 drawGrid(canvas, TILE_SIZE, canvasCenter, zoomFactor);
             }
