@@ -30,10 +30,9 @@ export default function PlayGame() {
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
-    console.log(game)
+    console.log(currentGame)
 
     function placeTile(coordinate: Coordinate) {
-        //TO-DO: Transfer responsibility to back-end.
         fetch('/api/place-tile', {
             method: 'POST',
             headers: {
@@ -66,6 +65,7 @@ export default function PlayGame() {
                     canvasInteractionState={canvasInteractionState}
                     placeTile={placeTile}
                     gameCanvasRef={gameCanvasRef}
+                    gameState={currentGame.game_state}
                 />
                 <Footer />
                 <Sidebar

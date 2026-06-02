@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, Dispatch, SetStateAction } from 'react';
 import { Board } from '@/interfaces/board';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
+import { GameState } from '@/enums/game-state';
 import { adjustCanvasSizeToElement } from '@/helpers/canvas-helpers';
 import { drawTiles } from '@/helpers/canvas-game-helpers';
 import { clearCanvas, highlightCurrentTile, convertCanvasCoordinatesToTileCoordinates, drawGrid } from '@/helpers/canvas-ui-helpers';
@@ -15,6 +16,7 @@ type Props = {
     canvasInteractionState: CanvasInteractionState;
     placeTile: (coordinate: Coordinate) => void;
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>;
+    gameState: GameState
 };
 
 export default function GameCanvas({
@@ -25,7 +27,8 @@ export default function GameCanvas({
     setZoomFactor,
     canvasInteractionState,
     placeTile,
-    gameCanvasRef
+    gameCanvasRef,
+    gameState
 }: Props) {
     const TILE_SIZE = 100;
     const MIN_ZOOM_FACTOR = 0.5;
@@ -45,6 +48,9 @@ export default function GameCanvas({
         if (uiOverlayRef.current !== null) {
             drawGrid(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor);
         }
+
+        //TO-DO: Draw a shadow over the canvas outside the current tile being rotated when
+        //the game state is rotating_tile.
     }
 
     function handleMouseDown(event: MouseEvent) {
@@ -91,7 +97,9 @@ export default function GameCanvas({
                 const y = event.clientY - rect.top;
 
                 clearCanvas(canvas);
-                highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter, zoomFactor);
+                if (gameState === GameState.PLACING_TILE) {
+                    highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter, zoomFactor);
+                }
                 drawGrid(canvas, TILE_SIZE, canvasCenter, zoomFactor);
             }
         }
