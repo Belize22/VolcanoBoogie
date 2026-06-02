@@ -92,7 +92,6 @@ export function applyShadowOverlay(
     if (context) {
         context.fillStyle = 'rgba(0, 0, 0, 0.5)';
         context.fillRect(0, 0, canvas.width, canvas.height);
-        console.log(pendingTiles);
 
         const adjustedTileSize = tileSize * zoomFactor;
 
