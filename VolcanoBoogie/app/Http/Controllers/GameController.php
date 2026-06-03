@@ -169,7 +169,7 @@ class GameController extends Controller
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
             'tile_id' => $baggedTile->tile_id,
-            'placement_status' => count($availableAdjacencies) > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED,
+            'placement_status' => $this->isRotateable($availableAdjacencies),
         ]);
         PlacedSubtile::create([
             'placed_tile_id' => $placedTile->id,
@@ -453,6 +453,18 @@ class GameController extends Controller
         })->get();
 
         return $subtileCandidates;
+    }
+
+    private function isRotateable($availableAdjacencies)
+    {
+        //TO-DO: Logic for determining whether a tile can have its rotation modified or not is wrong.
+        //Need to make sure that:
+        //- Four ways are placed automatically.
+        //- Dead-ends are placed automatically if there is only one tile to connect to.
+        //- Straightaways are placed automatically if there is only one tile to connect to.
+        //This is just a placeholder function until more complex logic that satisfies the above
+        //requirements is implemented.
+        return (count($availableAdjacencies) > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED);
     }
 
     private function isBagEmpty()
