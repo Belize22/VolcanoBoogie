@@ -95,28 +95,26 @@ export function applyShadowOverlay(
 
         const adjustedTileSize = tileSize * zoomFactor;
 
-        //Should only be one pending tile but iterate through all possibilities for robustness.
-        for (let i = 0; i < pendingTiles.length; i++) {
-            const {tileCenterX, tileCenterY} = retrieveTileCenter(
-                canvas,
-                pendingTiles[i].placed_subtiles,
-                canvasCenter,
-                adjustedTileSize
-            )
+        //Should only be one pending tile. Handle the next after confirmation is done.
+        const {tileCenterX, tileCenterY} = retrieveTileCenter(
+            canvas,
+            pendingTiles[0].placed_subtiles,
+            canvasCenter,
+            adjustedTileSize
+        )
 
-            context.translate(tileCenterX,tileCenterY); //Make center of tile the pivot point of rotation.
-            context.clearRect(
-                -adjustedTileSize/2, //Conversion from center defined square to top-left defined square.
-                -adjustedTileSize/2,
-                adjustedTileSize,
-                adjustedTileSize
-            )
+        context.translate(tileCenterX,tileCenterY); //Make center of tile the pivot point of rotation.
+        context.clearRect(
+            -adjustedTileSize/2, //Conversion from center defined square to top-left defined square.
+            -adjustedTileSize/2,
+            adjustedTileSize,
+            adjustedTileSize
+        )
 
-            //Translation must be isolated at the scope of a tile placement.
-            //Otherwise context adds up and tiles are placed weirdly.
-            context.translate(-tileCenterX, -tileCenterY);
-            context.restore();
-        }
+        //Translation must be isolated at the scope of a tile placement.
+        //Otherwise context adds up and tiles are placed weirdly.
+        context.translate(-tileCenterX, -tileCenterY);
+        context.restore();
     }
 }
 
