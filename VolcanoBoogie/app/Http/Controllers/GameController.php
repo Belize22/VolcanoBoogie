@@ -102,7 +102,46 @@ class GameController extends Controller
     }
 
     public function confirmTileRotation(Request $request) {
-        \Log::info($request);
+        $requestSubtile = $request->pendingTiles[0]['placed_subtiles'][0];
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($requestSubtile['coordinate']);
+        $tileAdjacencies = Rotation::getAdjacencies(
+            Rotation::from($requestSubtile['rotation']), 
+            PathType::from($requestSubtile['path_type'])
+        );
+
+        //Filters out all available directions and only provides the directions relevant to the
+        //current tile type and rotation.
+        $intersectingAdjacencies = array_uintersect(
+            $tileAdjacencies,
+            $connectedAdjacencies, 
+            fn($dir1, $dir2) => $dir1->value <=> $dir2->value
+        );
+
+        if (count($intersectingAdjacencies) === 0) {
+            return response()->json([
+                'error' => 'Improper tile orientation!',
+                'message' => 'Tile to be rotated does not connect to the rest of the map!',
+            ], 409);
+        }
+
+        //Confirm placement.
+        $tile = PlacedTile::find($request->pendingTiles[0]['id']);
+        $tile->placement_status = PlacementStatus::PLACED;
+        $tile->save();
+
+        //Update rotation.
+        $subtile = PlacedSubtile::find($tile->placedSubtiles[0]->id);
+        $subtile->rotation = $requestSubtile['rotation'];
+        $subtile->save();
+
+        $pendingTiles = PlacedTile::where('placement_status', PlacementStatus::PENDING)->get();
+
+        //Change game state if there are no tiles left to be rotated.
+        if (count($pendingTiles) === 0) {
+            $game = $this->getActiveGame();
+            $game->game_state = GameState::PLACING_TILE;
+            $game->save();
+        }
 
         $activeGame = $this->getActiveGame()::with([
             'board.placedTiles.anchor',
@@ -112,7 +151,7 @@ class GameController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'API call returns response!',
+            'message' => 'Tile rotation has been confirmed!',
             'game' => $activeGame,
         ], 200);
     }

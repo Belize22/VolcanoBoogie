@@ -69,7 +69,7 @@ export default function PlayGame() {
         .then((response) => response.json())
         .then((data) => {
             if (data.success) {
-                console.log(data);
+                setCurrentGame(data.game);
             }
             else if (data.error) {
                 console.log(data);
@@ -81,7 +81,6 @@ export default function PlayGame() {
         const previousGame = currentGame;
         const placedTiles = currentGame.board.placed_tiles;
 
-        //Should only be one pending tile but iterate through all possibilities for robustness.
         for (let i = 0; i < placedTiles.length; i++) {
             //Avoid filtering since we need access to all placed tiles to update
             //currentGame in an immutable fashion.
@@ -89,6 +88,7 @@ export default function PlayGame() {
                 placedTiles[i].placed_subtiles[0].rotation = convertNumericToRotation(
                     (convertRotationToNumeric(placedTiles[i].placed_subtiles[0].rotation) + (isClockwise ? 1 : -1)) % 4
                 )
+                break; //Only consider first result. After confirmation using endpoint, it will move on to the next.
             }
         }
 
