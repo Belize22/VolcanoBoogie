@@ -165,17 +165,20 @@ class GameController extends Controller
 
         $availableAdjacencies = $this->retrieveAllAvailableDirections($coordinate);
 
+        $pathType = TileType::tileTypeToPathType(Tile::where('id', $baggedTile->tile_id)->first()->tile_type);
+
         //Place tile on board.
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
             'tile_id' => $baggedTile->tile_id,
-            'placement_status' => $this->isRotateable($availableAdjacencies),
+            'placement_status' => $this->isRotateable($connectedAdjacencies, $pathType) 
+                ? PlacementStatus::PENDING : PlacementStatus::PLACED,
         ]);
         PlacedSubtile::create([
-            'placed_tile_id' => $placedTile->id,
+            'placed_tile_id' => $placedTile->id,    
             'x_coordinate' => $coordinate["x"],
             'y_coordinate' => $coordinate["y"],
-            'path_type' => TileType::tileTypeToPathType(Tile::where('id', $placedTile->tile_id)->first()->tile_type),
+            'path_type' => $pathType,
             'rotation' => $connectedAdjacencies[0],
             'property' => Property::SAFE,
             'is_neutralized' => false,
@@ -455,16 +458,34 @@ class GameController extends Controller
         return $subtileCandidates;
     }
 
-    private function isRotateable($availableAdjacencies)
+    private function isRotateable(array $connectedAdjacencies, PathType $pathType)
     {
-        //TO-DO: Logic for determining whether a tile can have its rotation modified or not is wrong.
-        //Need to make sure that:
-        //- Four ways are placed automatically.
-        //- Dead-ends are placed automatically if there is only one tile to connect to.
-        //- Straightaways are placed automatically if there is only one tile to connect to.
-        //This is just a placeholder function until more complex logic that satisfies the above
-        //requirements is implemented.
-        return (count($availableAdjacencies) > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED);
+        //Four ways are placed automatically.
+        if ($pathType === PathType::FOUR_WAY) {
+            return false;
+        }
+
+        //Dead-ends are placed automatically if there is only one tile to connect to.
+        if ($pathType === PathType::DEAD_END && count($connectedAdjacencies) === 1) {
+            return false;
+        }
+
+        //Straightaways are placed automatically if there aren't multiple tiles to 
+        //connect to that are not across from each other.
+        if ($pathType === PathType::STRAIGHT) {
+            if (in_array(Rotation::NORTH, $connectedAdjacencies) || in_array(Rotation::SOUTH, $connectedAdjacencies)) {
+                if (!in_array(Rotation::EAST, $connectedAdjacencies) && !in_array(Rotation::WEST, $connectedAdjacencies)) {
+                    return false;
+                }
+            }
+            else if (in_array(Rotation::EAST, $connectedAdjacencies) || in_array(Rotation::WEST, $connectedAdjacencies)) {
+                if (!in_array(Rotation::NORTH, $connectedAdjacencies) && !in_array(Rotation::SOUTH, $connectedAdjacencies)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private function isBagEmpty()
