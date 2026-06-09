@@ -108,4 +108,19 @@ enum Rotation: string
             return Rotation::WEST;
         }
     }
+
+    public static function getCoordinateRelativeToDirection(Coordinate $coordinate, Rotation $rotation) {
+        if ($rotation === Rotation::NORTH) {
+            return new Coordinate($coordinate->x, $coordinate->y + 1);
+        }
+        else if ($rotation === Rotation::EAST) {
+            return new Coordinate($coordinate->x + 1, $coordinate->y);
+        }
+        else if ($rotation === Rotation::SOUTH) {
+            return new Coordinate($coordinate->x, $coordinate->y - 1);
+        }
+        else { //EAST
+            return new Coordinate($coordinate->x - 1, $coordinate->y);
+        }
+    }
 }

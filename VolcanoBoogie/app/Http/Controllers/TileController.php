@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Classes\Coordinate;
+use App\Classes\SubtileGraph;
 use App\Models\Bag;
 use App\Models\Game;
 use App\Models\Board;
@@ -24,6 +25,12 @@ class TileController extends Controller
 {
     public function placeTile(Request $request)
     {
+        if ($this->getAllPlacementCandidates()) {
+
+        }
+
+        return;
+
         if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::PLACING_TILE) {
             return response()->json([
                 'error' => 'Cannot place tile!',
@@ -348,5 +355,10 @@ class TileController extends Controller
         $totalTileCount = BaggedTile::count();
 
         return ($totalTileCount === 1 && $noSanctumTileCount === 0);
+    }
+
+    private function getAllPlacementCandidates()
+    {
+        $test = new SubtileGraph(1);
     }
 }
