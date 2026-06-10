@@ -119,7 +119,7 @@ enum Rotation: string
         else if ($rotation === Rotation::SOUTH) {
             return new Coordinate($coordinate->x, $coordinate->y - 1);
         }
-        else { //EAST
+        else { //WEST
             return new Coordinate($coordinate->x - 1, $coordinate->y);
         }
     }

@@ -29,8 +29,6 @@ class TileController extends Controller
 
         }
 
-        return;
-
         if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::PLACING_TILE) {
             return response()->json([
                 'error' => 'Cannot place tile!',
@@ -360,5 +358,6 @@ class TileController extends Controller
     private function getAllPlacementCandidates()
     {
         $test = new SubtileGraph(1);
+        $test->findAvailablePlacementsWithBFS();
     }
 }

@@ -81,7 +81,7 @@ class GameController extends Controller
                 $anchor = PlacedSubtile::create([
                     'placed_tile_id' => $placedTile->id,
                     'x_coordinate' => 0,
-                    'y_coordinate' => -1,
+                    'y_coordinate' => 0,
                     'path_type' => PathType::FOUR_WAY,
                     'rotation' => Rotation::NORTH,
                     'property' => Property::SAFE,
@@ -90,7 +90,7 @@ class GameController extends Controller
                 PlacedSubtile::create([
                     'placed_tile_id' => $placedTile->id,
                     'x_coordinate' => 0,
-                    'y_coordinate' => 0,
+                    'y_coordinate' => -1,
                     'path_type' => PathType::DEAD_END,
                     'rotation' => Rotation::NORTH,
                     'property' => Property::SAFE,

@@ -15,5 +15,6 @@ class SubtileNode
         $this->rotation = $subtile->rotation;
         $this->pathType = $subtile->path_type;
         $this->adjacentNodes = [];
+        $this->visited = false;
     }
 }
