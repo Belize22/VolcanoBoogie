@@ -2,9 +2,11 @@
 
 namespace App\Classes;
 
+use App\Models\Tile;
 use App\Models\PlacedTile;
 use App\Models\PlacedSubtile;
 use App\Enums\Rotation;
+use App\Enums\TileType;
 use SplQueue;
 
 class SubtileGraph
@@ -16,6 +18,17 @@ class SubtileGraph
     {
         $this->subtileNodes = [];
         $subtiles = PlacedSubtile::whereIn('placed_tile_id', PlacedTile::where('board_id', $boardId)->pluck('id'))->get();
+        
+        //West and east wing tiles act as basis of board boundaries!
+        $wingSubtiles = PlacedSubtile::whereIn(
+            'placed_tile_id', PlacedTile::whereIn(
+                'tile_id', Tile::whereIn('tile_type', [TileType::WEST_WING, TileType::EAST_WING])->get()->pluck('id')
+            )->get()->pluck('id')
+        )->get();
+
+        $this->minX = $wingSubtiles->min('x_coordinate');
+        $this->maxX = $wingSubtiles->max('x_coordinate');
+        $this->minY = $wingSubtiles->min('y_coordinate');
 
         foreach ($subtiles as $subtile) {
             $subtileNode = new SubtileNode($subtile);
@@ -37,17 +50,18 @@ class SubtileGraph
 
             foreach ($currentNode->adjacentNodes as $adjacentNode) {
                 $node = $this->getNodeByCoordinate($adjacentNode);
-                if ($node === null) {
-                    array_push($availablePlacements, $adjacentNode);
-                }
-                else if (!$node->visited) {
-                    $nodeQueue->enqueue($this->getNodeByCoordinate($adjacentNode));
+                if ($adjacentNode->x >= $this->minX && $adjacentNode->x <= $this->maxX && $adjacentNode->y >= $this->minY) {
+                    if ($node === null) {
+                        array_push($availablePlacements, $adjacentNode);
+                    }
+                    else if (!$node->visited) {
+                        $nodeQueue->enqueue($this->getNodeByCoordinate($adjacentNode));
+                    }
                 }
             }
         }
 
-        \Log::info($availablePlacements);
-
+        $availablePlacements = array_unique($availablePlacements, SORT_REGULAR); //No duplicates.
         return $availablePlacements;
     }
 
