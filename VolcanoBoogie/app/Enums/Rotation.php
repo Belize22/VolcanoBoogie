@@ -42,6 +42,11 @@ enum Rotation: string
         }
     }
 
+    public static function rotate(Rotation $rotation, bool $isCcw) {
+        //add by -1/1, since we go by 90 degree increments.
+        return Rotation::numToEnum((Rotation::enumToNum($rotation) + ($isCcw ? -1 : 1)) % 4);
+    }
+
     public static function flip(Rotation $rotation) {
         //add by 2 since we go by 90 degree increments and 180 degrees essentially
         //"flips" the tile by rotating twice.
