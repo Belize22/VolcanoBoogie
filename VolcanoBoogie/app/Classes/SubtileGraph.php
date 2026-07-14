@@ -96,7 +96,7 @@ class SubtileGraph
                             $adjacencies = Rotation::getAdjacencies($node->rotation, $node->pathType);
                             foreach ($adjacencies as $adjacency) {
                                 if ($adjacency === Rotation::flip(Rotation::from($direction))) {
-                                    array_push($connectingTiles, $adjacentSpot);
+                                    array_push($connectingTiles, $currentSpot);
                                 }
                             }
                         }

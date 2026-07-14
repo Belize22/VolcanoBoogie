@@ -69,7 +69,7 @@ class TileController extends Controller
 
         $pathType = TileType::tileTypeToPathType(Tile::where('id', $selectedTile->tile_id)->first()->tile_type);
 
-        if ($this->placementClosesMap($pathType)) {
+        if ($this->placementClosesMap($pathType, $coordinate)) {
             return response()->json([
                 'error' => 'Cannot place tile!',
                 'message' => 'Tile selected will close the map!',
@@ -370,7 +370,7 @@ class TileController extends Controller
         return ($totalTileCount === 1 && $noSanctumTileCount === 0);
     }
 
-    private function placementClosesMap(PathType $pathType) {
+    private function placementClosesMap(PathType $pathType, Coordinate $coordinate) {
         $highestYCoordinate = PlacedSubtile::max('y_coordinate');
 
         $subtileGraph = $this->getSubtileGraph();
@@ -379,6 +379,13 @@ class TileController extends Controller
         
         if (count($placementCandidates) === 1 || count($connectingSpots) === 1) {
             $placementCandidate = count($placementCandidates) === 1 ? $placementCandidates[0] : $connectingSpots[0];
+
+            //Make sure that if the user chooses an alternative placement candidate within map bounds,
+            //to bypass map closure algorithm since the only connecting spot is not a concern in this case.
+            if (count($placementCandidates) > 1 && $connectingSpots[0] != $coordinate) {
+                return false;
+            }
+
             $adjacentTileDirections = $this->retrieveAllConnectingDirections($placementCandidate);
             $adjacentConnectionDirections = $this->retrieveAllAvailableDirections($placementCandidate);
 
