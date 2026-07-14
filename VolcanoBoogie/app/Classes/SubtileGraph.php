@@ -50,7 +50,7 @@ class SubtileGraph
 
             foreach ($currentNode->adjacentNodes as $adjacentNode) {
                 $node = $this->getNodeByCoordinate($adjacentNode);
-                if ($adjacentNode->x >= $this->minX && $adjacentNode->x <= $this->maxX && $adjacentNode->y >= $this->minY) {
+                if ($this->isWithinBounds($adjacentNode)) {
                     if ($node === null) {
                         array_push($availablePlacements, $adjacentNode);
                     }
@@ -63,6 +63,50 @@ class SubtileGraph
 
         $availablePlacements = array_unique($availablePlacements, SORT_REGULAR); //No duplicates.
         return $availablePlacements;
+    }
+
+    public function findOpenConnectionPositionsToMapWithBFS($highestYCoordinate) {
+        $emptyTiles = [];      //Mark visited empty tiles.
+        $connectingTiles = []; //Coordinates that connect the empty area to the tile-formed map.
+        $directions = array_column(Rotation::cases(), 'value');
+
+        \Log::info($directions);
+
+        $coordinateQueue = new SplQueue();
+
+        //highestY + 1 guaranteed to be an empty spot that isn't closed off by
+        //the tile formed map.
+        $coordinateQueue->enqueue(new Coordinate(0, $highestYCoordinate + 1));
+
+        while (count($coordinateQueue) > 0) {
+            $currentSpot = $coordinateQueue->dequeue();
+
+            foreach($directions as $direction) {
+                $adjacentSpot = Rotation::getCoordinateRelativeToDirection($currentSpot, Rotation::from($direction));
+
+                if ($this->isWithinBounds($adjacentSpot) && $currentSpot->y <= $highestYCoordinate + 1) {
+                    //If not already part of the collection and is not an occupied tile.
+                    if (!in_array($adjacentSpot, $emptyTiles)) {
+                        if ($this->getNodeByCoordinate($adjacentSpot) === null) {
+                            $coordinateQueue->enqueue($adjacentSpot);
+                            array_push($emptyTiles, $currentSpot);
+                        }
+                        else {
+                            $node = $this->getNodeByCoordinate($adjacentSpot);
+                            $adjacencies = Rotation::getAdjacencies($node->rotation, $node->pathType);
+                            foreach ($adjacencies as $adjacency) {
+                                if ($adjacency === Rotation::flip(Rotation::from($direction))) {
+                                    array_push($connectingTiles, $adjacentSpot);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $connectingTiles = array_unique($connectingTiles, SORT_REGULAR); //No duplicates;
+        return $connectingTiles;
     }
 
     private function setupAdjacencies() {
@@ -81,5 +125,9 @@ class SubtileGraph
 
     private function getNodeByCoordinate(Coordinate $coordinate) {
         return array_find($this->subtileNodes, fn($node) => $node->coordinate == $coordinate);
+    }
+
+    private function isWithinBounds(Coordinate $coordinate) {
+        return $coordinate->x >= $this->minX && $coordinate->x <= $this->maxX && $coordinate->y >= $this->minY;
     }
 }

@@ -371,11 +371,16 @@ class TileController extends Controller
     }
 
     private function placementClosesMap(PathType $pathType) {
-        $placementCandidates = $this->getAllPlacementCandidates();
+        $highestYCoordinate = PlacedSubtile::max('y_coordinate');
+
+        $subtileGraph = $this->getSubtileGraph();
+        $placementCandidates = $subtileGraph->findAvailablePlacementsWithBFS();
+        $connectingSpots = $subtileGraph->findOpenConnectionPositionsToMapWithBFS($highestYCoordinate);
         
-        if (count($placementCandidates) === 1) {
-            $adjacentTileDirections = $this->retrieveAllConnectingDirections($placementCandidates[0]);
-            $adjacentConnectionDirections = $this->retrieveAllAvailableDirections($placementCandidates[0]);
+        if (count($placementCandidates) === 1 || count($connectingSpots) === 1) {
+            $placementCandidate = count($placementCandidates) === 1 ? $placementCandidates[0] : $connectingSpots[0];
+            $adjacentTileDirections = $this->retrieveAllConnectingDirections($placementCandidate);
+            $adjacentConnectionDirections = $this->retrieveAllAvailableDirections($placementCandidate);
 
             if (count($adjacentConnectionDirections) === 0) {
                 return true;
@@ -417,9 +422,9 @@ class TileController extends Controller
         return false;
     }
 
-    private function getAllPlacementCandidates()
+    private function getSubtileGraph()
     {
         $subtileGraph = new SubtileGraph(1);
-        return $subtileGraph->findAvailablePlacementsWithBFS();
+        return $subtileGraph;
     }
 }
