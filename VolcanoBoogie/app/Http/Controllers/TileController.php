@@ -61,20 +61,17 @@ class TileController extends Controller
                 'message' => 'Tile is unable to connect to another tile from here!',
             ], 409);
         }
+        $pulledOutTileIdList = [];
 
-        //Sanctum must be placed last.
-        $selectedTile = BaggedTile::inRandomOrder()
-            ->whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
-            ->first();
-
-        $pathType = TileType::tileTypeToPathType(Tile::where('id', $selectedTile->tile_id)->first()->tile_type);
-
-        if ($this->placementClosesMap($pathType, $coordinate)) {
-            return response()->json([
-                'error' => 'Cannot place tile!',
-                'message' => 'Tile selected will close the map!',
-            ], 409);
-        }
+        //Keep drawing tiles until one that doesn't close the map is pulled out.
+        do {
+            $sanctumId = Tile::where('tile_type', TileType::SANCTUM)->first()->id;
+            $selectedTile = BaggedTile::inRandomOrder()
+                ->whereNotIn('tile_id', [$sanctumId, ...$pulledOutTileIdList])
+                ->first();
+            array_push($pulledOutTileIdList, $selectedTile->tile_id);
+            $pathType = TileType::tileTypeToPathType(Tile::where('id', $selectedTile->tile_id)->first()->tile_type);
+        } while ($this->placementClosesMap($pathType, $coordinate));
         
         $this->placeTileAndSubtileOnBoard($selectedTile, $request->boardId, $coordinate);
 
