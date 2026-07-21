@@ -32,10 +32,10 @@ class TileController extends Controller
             ], 409);
         }
 
-        if ($this->isBagEmpty()) {
+        if ($this->areSanctumAndKeysPlaced()) {
             return response()->json([
-                'error' => 'Bag is empty!',
-                'message' => 'All tiles have been placed on the board!',
+                'error' => 'Sanctum has been placed!',
+                'message' => 'Sanctum has been placed, grab the artifact and escape!',
             ], 409);
         }
 
@@ -371,10 +371,10 @@ class TileController extends Controller
         return true;
     }
 
-    private function isBagEmpty()
+    private function areSanctumAndKeysPlaced()
     {
-        $tileCount = BaggedTile::whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->count();
-        return $tileCount === 0;
+        $tileCount = PlacedTile::whereIn('tile_id', Tile::whereIn('tile_type', [TileType::SANCTUM, TileType::KEY_CHAMBER])->pluck('id'))->count();
+        return $tileCount === 4;
     }
 
     private function isOnlySanctumRemaining()
