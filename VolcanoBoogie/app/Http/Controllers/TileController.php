@@ -85,7 +85,10 @@ class TileController extends Controller
 
         //Early sanctum placement acts as a safeguard for if no tile keeps a map open.
         if ($this->isOnlySanctumRemaining() || !$selectedTile) {
-            $this->placeSanctum($request->boardId);
+            $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+            $game->game_state = GameState::PLACING_SANCTUM;
+            $game->save();
+            //$this->placeSanctum($request->boardId);
         }
 
         $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
