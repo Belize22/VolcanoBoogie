@@ -69,13 +69,22 @@ class TileController extends Controller
             $selectedTile = BaggedTile::inRandomOrder()
                 ->whereNotIn('tile_id', [$sanctumId, ...$pulledOutTileIdList])
                 ->first();
-            array_push($pulledOutTileIdList, $selectedTile->tile_id);
+            if ($selectedTile) {
+                array_push($pulledOutTileIdList, $selectedTile->tile_id);
+            }
+            else { //No tiles can keep the map open, move on to sanctum placement.
+                break;
+            }
             $pathType = TileType::tileTypeToPathType(Tile::where('id', $selectedTile->tile_id)->first()->tile_type);
         } while ($this->placementClosesMap($pathType, $coordinate));
         
-        $this->placeTileAndSubtileOnBoard($selectedTile, $request->boardId, $coordinate);
+        //To account for the off-chance that no tile keeps the map open.
+        if ($selectedTile) {
+            $this->placeTileAndSubtileOnBoard($selectedTile, $request->boardId, $coordinate);
+        }
 
-        if ($this->isOnlySanctumRemaining()) {
+        //Early sanctum placement acts as a safeguard for if no tile keeps a map open.
+        if ($this->isOnlySanctumRemaining() || !$selectedTile) {
             $this->placeSanctum($request->boardId);
         }
 
@@ -94,11 +103,13 @@ class TileController extends Controller
 
     public function confirmTileRotation(Request $request) {
         $requestSubtile = $request->pendingTiles[0]['placed_subtiles'][0];
-        $connectedAdjacencies = $this->retrieveAllConnectingDirections(new Coordinate($requestSubtile['coordinate']['x'], $requestSubtile['coordinate']['y']));
-        $tileAdjacencies = Rotation::getAdjacencies(
-            Rotation::from($requestSubtile['rotation']), 
-            PathType::from($requestSubtile['path_type'])
-        );
+
+        $rotation = Rotation::from($requestSubtile['rotation']);
+        $coordinate = new Coordinate($requestSubtile['coordinate']['x'], $requestSubtile['coordinate']['y']);
+        $pathType = PathType::from($requestSubtile['path_type']);
+
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
+        $tileAdjacencies = Rotation::getAdjacencies($rotation, $pathType);
 
         //Filters out all available directions and only provides the directions relevant to the
         //current tile type and rotation.
@@ -112,6 +123,13 @@ class TileController extends Controller
             return response()->json([
                 'error' => 'Improper tile orientation!',
                 'message' => 'Tile to be rotated does not connect to the rest of the map!',
+            ], 409);
+        }
+
+        if ($this->orientationClosesMap($pathType, $coordinate, $rotation)) {
+            return response()->json([
+                'error' => 'Improper tile orientation!',
+                'message' => 'Tile to be rotated will close map with this orientation!',
             ], 409);
         }
 
@@ -305,7 +323,7 @@ class TileController extends Controller
             }
         }
 
-        return $availableDirections;
+        return array_values($availableDirections);
     }
 
     private function retrieveAdjacentSubtileCandidates($coordinate)
@@ -373,6 +391,10 @@ class TileController extends Controller
         $subtileGraph = $this->getSubtileGraph();
         $placementCandidates = $subtileGraph->findAvailablePlacementsWithBFS();
         $connectingSpots = $subtileGraph->findOpenConnectionPositionsToMapWithBFS($highestYCoordinate);
+
+        if (count($placementCandidates) === 0 || count($connectingSpots) === 0) {
+            return true;
+        }
         
         if (count($placementCandidates) === 1 || count($connectingSpots) === 1) {
             $placementCandidate = count($placementCandidates) === 1 ? $placementCandidates[0] : $connectingSpots[0];
@@ -426,9 +448,17 @@ class TileController extends Controller
         return false;
     }
 
-    private function getSubtileGraph()
+    private function orientationClosesMap(PathType $pathType, Coordinate $coordinate, Rotation $rotation) {
+        $highestYCoordinate = PlacedSubtile::max('y_coordinate');
+        $subtileGraph = $this->getSubtileGraph($coordinate, $rotation);
+        $connectingSpots = $subtileGraph->findOpenConnectionPositionsToMapWithBFS($highestYCoordinate);
+
+        return count($connectingSpots) === 0;
+    }
+
+    private function getSubtileGraph(Coordinate $coordinate = NULL, ?Rotation $rotation = NULL)
     {
-        $subtileGraph = new SubtileGraph(1);
+        $subtileGraph = new SubtileGraph(1, $coordinate, $rotation);
         return $subtileGraph;
     }
 }

@@ -14,7 +14,7 @@ class SubtileGraph
     /**
      * Create a new class instance.
      */
-    public function __construct($boardId)
+    public function __construct($boardId, ?Coordinate $coordinate = NULL, ?Rotation $rotation = NULL)
     {
         $this->subtileNodes = [];
         $subtiles = PlacedSubtile::whereIn('placed_tile_id', PlacedTile::where('board_id', $boardId)->pluck('id'))->get();
@@ -33,6 +33,11 @@ class SubtileGraph
         foreach ($subtiles as $subtile) {
             $subtileNode = new SubtileNode($subtile);
             array_push($this->subtileNodes, $subtileNode);
+        }
+
+        //Make modifications based on user selection of tile to be rotated pre-confirmation.
+        if ($coordinate && $rotation) {
+            $coordinate = $this->modifyNodeByCoordinate($coordinate, $rotation);
         }
 
         $this->setupAdjacencies();
@@ -62,7 +67,7 @@ class SubtileGraph
         }
 
         $availablePlacements = array_unique($availablePlacements, SORT_REGULAR); //No duplicates.
-        return $availablePlacements;
+        return array_values($availablePlacements);
     }
 
     public function findOpenConnectionPositionsToMapWithBFS($highestYCoordinate) {
@@ -106,7 +111,7 @@ class SubtileGraph
         }
 
         $connectingTiles = array_unique($connectingTiles, SORT_REGULAR); //No duplicates;
-        return $connectingTiles;
+        return array_values($connectingTiles);
     }
 
     private function setupAdjacencies() {
@@ -125,6 +130,16 @@ class SubtileGraph
 
     private function getNodeByCoordinate(Coordinate $coordinate) {
         return array_find($this->subtileNodes, fn($node) => $node->coordinate == $coordinate);
+    }
+
+    private function modifyNodeByCoordinate(Coordinate $coordinate, Rotation $rotation) {
+        $subtileNode = array_find($this->subtileNodes, fn($node) => $node->coordinate == $coordinate);
+        $index = array_find_key($this->subtileNodes, fn($node) => $node->coordinate == $coordinate);
+
+        unset($this->subtileNodes[$index]);
+        $subtileNode->rotation = $rotation;
+        array_push($this->subtileNodes, $subtileNode);
+        $this->subtileNodes = array_values($this->subtileNodes);
     }
 
     private function isWithinBounds(Coordinate $coordinate) {

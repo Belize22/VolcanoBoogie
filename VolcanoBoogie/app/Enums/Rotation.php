@@ -43,8 +43,9 @@ enum Rotation: string
     }
 
     public static function rotate(Rotation $rotation, bool $isCcw) {
-        //add by -1/1, since we go by 90 degree increments.
-        return Rotation::numToEnum((Rotation::enumToNum($rotation) + ($isCcw ? -1 : 1)) % 4);
+        //add by 3/1, since we go by 90 degree increments.
+        //add by 3 instead of -1 (both values are ways to rotate left) to avoid negative mod problem.
+        return Rotation::numToEnum((Rotation::enumToNum($rotation) + ($isCcw ? 3 : 1)) % 4);
     }
 
     public static function flip(Rotation $rotation) {
