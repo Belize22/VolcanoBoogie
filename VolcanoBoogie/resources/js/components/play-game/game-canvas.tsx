@@ -168,7 +168,7 @@ export default function GameCanvas({
 
     useEffect(() => {
         renderCanvasElements();
-    }, [board, canvasCenter, zoomFactor, canvasInteractionState]);
+    }, [availableSpots, board, canvasCenter, zoomFactor, canvasInteractionState]);
 
     useEffect(() => {
         window.addEventListener("resize", renderCanvasElements);
@@ -176,6 +176,7 @@ export default function GameCanvas({
             uiOverlayRef.current.addEventListener("mousedown", handleMouseDown);
             uiOverlayRef.current.addEventListener("mouseup", handleMouseUp);
             uiOverlayRef.current.addEventListener("mousemove", handleMouseMove);
+            uiOverlayRef.current.addEventListener("mouseleave", renderCanvasElements);
             uiOverlayRef.current.addEventListener("wheel", handleMouseScroll);
         }
         return () => {
@@ -184,6 +185,7 @@ export default function GameCanvas({
                 uiOverlayRef.current.removeEventListener("mousedown", handleMouseDown);
                 uiOverlayRef.current.removeEventListener("mouseup", handleMouseUp);
                 uiOverlayRef.current.removeEventListener("mousemove", handleMouseMove);
+                uiOverlayRef.current.removeEventListener("mouseleave", renderCanvasElements);
                 uiOverlayRef.current.removeEventListener("wheel", handleMouseScroll);
             }
         }
