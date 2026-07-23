@@ -31,7 +31,7 @@ export default function PlayGame() {
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
-    const [availableSpots, setAvailableSpots] = useState<Coordinate[] | null>(null);
+    const [availableSpots, setAvailableSpots] = useState<Coordinate[]>([]);
 
     function placeTile(coordinate: Coordinate) {
         fetch('/api/place-tile', {
@@ -136,6 +136,7 @@ export default function PlayGame() {
             <Head title="Play Game" />
             <div className="flex w-screen h-screen flex-1 flex-col gap-4 overflow-x-auto">
                 <GameCanvas
+                    availableSpots={availableSpots}
                     board={currentGame.board}
                     canvasCenter={canvasCenter}
                     setCanvasCenter={setCanvasCenter}

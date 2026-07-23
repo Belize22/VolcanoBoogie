@@ -9,12 +9,14 @@ import { drawTiles } from '@/helpers/canvas-game-helpers';
 import { 
     clearCanvas, 
     highlightCurrentTile, 
+    highlightPlacementCandidates,
     convertCanvasCoordinatesToTileCoordinates, 
     drawGrid,
     applyShadowOverlay
 } from '@/helpers/canvas-ui-helpers';
 
 type Props = {
+    availableSpots: Coordinate[];
     board: Board;
     canvasCenter: Coordinate;
     setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
@@ -27,6 +29,7 @@ type Props = {
 };
 
 export default function GameCanvas({
+    availableSpots,
     board,
     canvasCenter,
     setCanvasCenter,
@@ -66,6 +69,9 @@ export default function GameCanvas({
                     canvasCenter,
                     zoomFactor
                 );
+            }
+            else if (gameState === GameState.PLACING_SANCTUM) {
+                highlightPlacementCandidates(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor, availableSpots);
             }
             drawGrid(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor);
         }
@@ -115,7 +121,7 @@ export default function GameCanvas({
                 const y = event.clientY - rect.top;
 
                 clearCanvas(canvas);
-                if (gameState === GameState.PLACING_TILE) {
+                if (gameState === GameState.PLACING_TILE || gameState === GameState.PLACING_SANCTUM) {
                     highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter, zoomFactor);
                 }
                 else if (gameState === GameState.ROTATING_TILE) {
@@ -126,6 +132,10 @@ export default function GameCanvas({
                         canvasCenter,
                         zoomFactor
                     );
+                }
+
+                if (gameState === GameState.PLACING_SANCTUM) {
+                    highlightPlacementCandidates(canvas, TILE_SIZE, canvasCenter, zoomFactor, availableSpots);
                 }
                 drawGrid(canvas, TILE_SIZE, canvasCenter, zoomFactor);
             }

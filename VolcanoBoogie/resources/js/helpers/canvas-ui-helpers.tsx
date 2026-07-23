@@ -81,6 +81,48 @@ export function highlightCurrentTile(
     }
 }
 
+export function highlightPlacementCandidates(
+    canvas: HTMLCanvasElement,  
+    tileSize: number, 
+    canvasCenter: Coordinate,
+    zoomFactor: number,
+    availableSpots: Coordinate[]
+) {
+    const context = canvas.getContext("2d");
+    if (context) {
+        const width = canvas.width;
+        const height = canvas.height;
+
+        const adjustedTileSize = tileSize * zoomFactor;
+
+        const WIDTH_OFFSET = (width/2 % adjustedTileSize) - adjustedTileSize/2 + (canvasCenter.x % adjustedTileSize);
+        const HEIGHT_OFFSET = (height/2 % adjustedTileSize) - adjustedTileSize/2 + (canvasCenter.y % adjustedTileSize);
+
+        for (let i = 0; i < availableSpots.length; i++) {
+            const canvasCoordinates = convertTileCoordinatesToCanvasCoordinates(
+                canvas,
+                availableSpots[i].x,
+                availableSpots[i].y,
+                tileSize,
+                canvasCenter,
+                zoomFactor
+            );
+
+            if (canvasCoordinates !== null) {
+                context.fillStyle = 'rgba(0, 255, 0, 0.5)';
+
+                //Add by width offset to ensure highlighted square fits grid tile.
+                context.fillRect(
+                    canvasCoordinates.x, 
+                    canvasCoordinates.y, 
+                    adjustedTileSize, 
+                    adjustedTileSize
+                );
+            }
+        }
+    }
+}
+
 export function applyShadowOverlay(
     canvas: HTMLCanvasElement, 
     pendingTiles: PlacedTile[],
@@ -126,7 +168,6 @@ export function convertCanvasCoordinatesToTileCoordinates(
     canvasCenter: Coordinate,
     zoomFactor: number
 ): Coordinate | null {
-
     const context = canvas.getContext("2d");
     if (context) {
         const adjustedTileSize = zoomFactor * tileSize;
@@ -135,6 +176,26 @@ export function convertCanvasCoordinatesToTileCoordinates(
         const y = Math.floor((posY - (canvas.height/2 - adjustedTileSize/2) - canvasCenter.y)/adjustedTileSize);
 
         return {x: x, y: -y};
+    }
+    return null;
+}
+
+export function convertTileCoordinatesToCanvasCoordinates(
+    canvas: HTMLCanvasElement,
+    x: number, 
+    y: number, 
+    tileSize: number, 
+    canvasCenter: Coordinate,
+    zoomFactor: number
+): Coordinate | null {
+    const context = canvas.getContext("2d");
+    if (context) {
+        const adjustedTileSize = zoomFactor * tileSize;
+
+        const posX = (x * adjustedTileSize) + (canvas.width/2 - adjustedTileSize/2) + canvasCenter.x;
+        const posY = (-y * adjustedTileSize) + (canvas.height/2 - adjustedTileSize/2) + canvasCenter.y;
+
+        return {x: posX, y: posY};
     }
     return null;
 }
