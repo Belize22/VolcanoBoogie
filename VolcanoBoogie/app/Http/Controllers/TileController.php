@@ -464,6 +464,48 @@ class TileController extends Controller
         return count($connectingSpots) === 0;
     }
 
+    private function getPlacementCandidatesForSanctum() {
+        $currentYCoordinate = PlacedSubtile::max('y_coordinate'); //Start with highest and decrement if no suitable candidates.
+        $placementCandidates = [];
+
+        while (empty($placementCandidates) && !$this->tileOutOfBounds(new Coordinate(0, $currentYCoordinate))) {
+            $currentRow = PlacedSubtile::where('y_coordinate', $currentYCoordinate)->select(
+                'rotation', 
+                'path_type', 
+                'x_coordinate', 
+                'y_coordinate'
+            )->get();
+
+            foreach ($currentRow as $currentTile)
+            {
+                $availableDirections = $this->retrieveAllAvailableDirections($currentTile->coordinate);
+                $tileDirections = Rotation::getAdjacencies($currentTile->rotation, $currentTile->path_type);
+                
+                //Unoccupied tiles that actually connect to the current tile.
+                $candidateDirections =  array_uintersect(
+                    $availableDirections,
+                    $tileDirections, 
+                    fn($dir1, $dir2) => $dir1->value <=> $dir2->value
+                );
+
+                foreach ($candidateDirections as $candidateDirection)
+                {
+                    //Need to make sure there is room for a 1x2 tile, regardless of orientation.
+                    $tile1 = Rotation::getCoordinateRelativeToDirection($currentTile->coordinate, $candidateDirection);
+                    $tile2 = Rotation::getCoordinateRelativeToDirection($tile1, $candidateDirection);
+                    if (!$this->spaceIsOccupied($tile1) && !$this->tileOutOfBounds($tile1)
+                        && !$this->spaceIsOccupied($tile2) && !$this->tileOutOfBounds($tile2))
+                    {
+                        array_push($placementCandidates, $tile1);
+                    }
+                }
+            }
+            $currentYCoordinate--;
+        }
+
+        return $placementCandidates;
+    }
+
     private function getSubtileGraph(Coordinate $coordinate = NULL, ?Rotation $rotation = NULL)
     {
         $subtileGraph = new SubtileGraph(1, $coordinate, $rotation);
