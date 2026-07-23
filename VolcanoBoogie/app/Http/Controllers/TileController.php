@@ -86,8 +86,13 @@ class TileController extends Controller
         //Early sanctum placement acts as a safeguard for if no tile keeps a map open.
         if ($this->isOnlySanctumRemaining() || !$selectedTile) {
             $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
-            $game->game_state = GameState::PLACING_SANCTUM;
-            $game->save();
+
+            //Need to let user rotate the tile if option is available before moving onto
+            //sanctum placement.
+            if ($game->game_state !== GameState::ROTATING_TILE) {
+                $game->game_state = GameState::PLACING_SANCTUM;
+                $game->save();
+            }
             //$this->placeSanctum($request->boardId);
         }
 
@@ -151,7 +156,7 @@ class TileController extends Controller
         //Change game state if there are no tiles left to be rotated.
         if (count($pendingTiles) === 0) {
             $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
-            $game->game_state = GameState::PLACING_TILE;
+            $game->game_state = $this->isOnlySanctumRemaining() ? GameState::PLACING_SANCTUM : GameState::PLACING_TILE;
             $game->save();
         }
 
