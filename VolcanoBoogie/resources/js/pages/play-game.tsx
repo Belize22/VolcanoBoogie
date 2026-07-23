@@ -1,9 +1,10 @@
 import { PageProps } from '@inertiajs/core';
 import { Head, usePage } from '@inertiajs/react';
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Game } from '@/interfaces/game';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
+import { GameState } from '@/enums/game-state';
 import { PlacementStatus } from '@/enums/placement-status';
 import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/rotation-helpers';
 import Sidebar from '@/components/play-game/sidebar';
@@ -30,7 +31,7 @@ export default function PlayGame() {
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
-    console.log(currentGame);
+    const [availableSpots, setAvailableSpots] = useState<Coordinate[] | null>(null);
 
     function placeTile(coordinate: Coordinate) {
         fetch('/api/place-tile', {
@@ -77,6 +78,26 @@ export default function PlayGame() {
         });
     }
 
+    function getAvailableSpotsForSanctumPlacement() {
+        fetch('/api/get-sanctum-placement-candidates', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                console.log(data.availableSpots);
+                setAvailableSpots(data.availableSpots);
+            }
+            else if (data.error) {
+                console.log(data);
+            }
+        });
+    }
+
     function rotateTile(isClockwise: boolean) {
         const previousGame = currentGame;
         const placedTiles = currentGame.board.placed_tiles;
@@ -102,6 +123,13 @@ export default function PlayGame() {
             }
         )
     }
+
+    useEffect(() => {
+        console.log(currentGame);
+        if (currentGame.game_state === GameState.PLACING_SANCTUM) {
+            getAvailableSpotsForSanctumPlacement();
+        }
+    }, []);
     
     return (
         <>

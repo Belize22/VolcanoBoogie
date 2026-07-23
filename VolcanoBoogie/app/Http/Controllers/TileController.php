@@ -173,6 +173,16 @@ class TileController extends Controller
         ], 200);
     }
 
+    public function getAvailableSpotsForSanctumPlacement(Request $request)
+    {
+        $availableSpots = $this->getPlacementCandidatesForSanctum();
+        return response()->json([
+            'success' => true,
+            'message' => 'Tile rotation has been confirmed!',
+            'availableSpots' => $availableSpots,
+        ], 200);
+    }
+
     private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, Coordinate $coordinate) {
         $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
 
