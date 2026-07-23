@@ -173,12 +173,23 @@ class TileController extends Controller
         ], 200);
     }
 
+    public function getAvailableSpotsForTilePlacement()
+    {
+        $subtileGraph = $this->getSubtileGraph();
+        $availableSpots = $subtileGraph->findAvailablePlacementsWithBFS();
+        return response()->json([
+            'success' => true,
+            'message' => 'Retrieved candidate spots for tile placement!',
+            'availableSpots' => $availableSpots,
+        ], 200);
+    }
+
     public function getAvailableSpotsForSanctumPlacement(Request $request)
     {
         $availableSpots = $this->getPlacementCandidatesForSanctum();
         return response()->json([
             'success' => true,
-            'message' => 'Tile rotation has been confirmed!',
+            'message' => 'Retrieved candidate spots for sanctum placement!',
             'availableSpots' => $availableSpots,
         ], 200);
     }

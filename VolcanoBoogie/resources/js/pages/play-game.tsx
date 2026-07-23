@@ -78,6 +78,26 @@ export default function PlayGame() {
         });
     }
 
+    function getAvailableSpotsForTilePlacement() {
+        fetch('/api/get-tile-placement-candidates', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                console.log(data.availableSpots);
+                setAvailableSpots(data.availableSpots);
+            }
+            else if (data.error) {
+                console.log(data);
+            }
+        });
+    }
+
     function getAvailableSpotsForSanctumPlacement() {
         fetch('/api/get-sanctum-placement-candidates', {
             method: 'GET',
@@ -89,7 +109,6 @@ export default function PlayGame() {
         .then((response) => response.json())
         .then((data) => {
             if (data.success) {
-                console.log(data.availableSpots);
                 setAvailableSpots(data.availableSpots);
             }
             else if (data.error) {
@@ -126,10 +145,13 @@ export default function PlayGame() {
 
     useEffect(() => {
         console.log(currentGame);
+        if (currentGame.game_state === GameState.PLACING_TILE) {
+            getAvailableSpotsForTilePlacement();
+        }
         if (currentGame.game_state === GameState.PLACING_SANCTUM) {
             getAvailableSpotsForSanctumPlacement();
         }
-    }, []);
+    }, [currentGame.board]);
     
     return (
         <>
