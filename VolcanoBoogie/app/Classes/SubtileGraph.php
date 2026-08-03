@@ -75,8 +75,6 @@ class SubtileGraph
         $connectingTiles = []; //Coordinates that connect the empty area to the tile-formed map.
         $directions = array_column(Rotation::cases(), 'value');
 
-        \Log::info($directions);
-
         $coordinateQueue = new SplQueue();
 
         //highestY + 1 guaranteed to be an empty spot that isn't closed off by

@@ -181,14 +181,36 @@ class TileController extends Controller
 
     public function placeSanctum(Request $request)
     {
-        \Log::info($request);
         if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::PLACING_SANCTUM) {
             return response()->json([
                 'error' => 'Cannot place sanctum!',
                 'message' => 'Must resolve other actions before placing sanctum!',
             ], 409);
         }
-        //$this->placeSanctumTile($request->boardId);
+
+        $coordinate = new Coordinate($request->coordinate["x"], $request->coordinate["y"]);
+        $availableSpots = $this->getPlacementCandidatesForSanctum();
+
+        if (!is_numeric(array_search($coordinate, $availableSpots))) {
+            return response()->json([
+                'error' => 'Improper sanctum placement!',
+                'message' => 'Coordinate selected is not a viable placement candidate!',
+            ], 409);
+        }
+
+        $this->placeSanctumTile($request->boardId, $coordinate);
+
+        $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
+            'board.placedTiles.anchor',
+            'board.placedTiles.tile',
+            'board.placedTiles.placedSubtiles',
+        ])->first();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Sanctum placement has been confirmed!',
+            'game' => $activeGame,
+        ], 200);
     }
 
     public function getAvailableSpotsForTilePlacement()
@@ -250,11 +272,19 @@ class TileController extends Controller
         $baggedTile->delete();
     }
 
-    private function placeSanctumTile(int $boardId)
+    private function placeSanctumTile(int $boardId, Coordinate $coordinate)
     {
-        //First is a stop gap until UI to choose a sanctum location is implemented!
-        $furthestSubtile = PlacedSubtile::where('y_coordinate', PlacedSubtile::max('y_coordinate'))->first();
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
+
+        if (empty($connectedAdjacencies)) {
+            return;
+        }
+
         $sanctum = BaggedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->first();
+
+        $artifactCoordinate = Rotation::getCoordinateRelativeToDirection(
+            $coordinate, Rotation::flip($connectedAdjacencies[0])
+        );
 
         //Place tile on board.
         $placedTile = PlacedTile::create([
@@ -264,19 +294,19 @@ class TileController extends Controller
         ]);
         PlacedSubtile::create([
             'placed_tile_id' => $placedTile->id,
-            'x_coordinate' => $furthestSubtile->coordinate->x,
-            'y_coordinate' => $furthestSubtile->coordinate->y + 1,
+            'x_coordinate' => $coordinate->x,
+            'y_coordinate' => $coordinate->y,
             'path_type' => PathType::STRAIGHT,
-            'rotation' => Rotation::NORTH,
+            'rotation' => Rotation::flip($connectedAdjacencies[0]),
             'property' => Property::SAFE,
             'is_neutralized' => false,
         ]);
         PlacedSubtile::create([
             'placed_tile_id' => $placedTile->id,
-            'x_coordinate' => $furthestSubtile->coordinate->x,
-            'y_coordinate' => $furthestSubtile->coordinate->y + 2,
+            'x_coordinate' => $artifactCoordinate->x,
+            'y_coordinate' => $artifactCoordinate->y,
             'path_type' => PathType::DEAD_END,
-            'rotation' => Rotation::SOUTH,
+            'rotation' => $connectedAdjacencies[0],
             'property' => Property::SAFE,
             'is_neutralized' => false,
         ]);
