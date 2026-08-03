@@ -78,6 +78,26 @@ export default function PlayGame() {
         });
     }
 
+    function placeSanctum(coordinate: Coordinate) {
+        fetch('/api/place-sanctum', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({boardId: game.board.id, coordinate: coordinate})
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                setCurrentGame(data.game);
+            }
+            else if (data.error) {
+                console.log(data);
+            }
+        });
+    }
+
     function getAvailableSpotsForTilePlacement() {
         fetch('/api/get-tile-placement-candidates', {
             method: 'GET',
@@ -144,7 +164,6 @@ export default function PlayGame() {
     }
 
     useEffect(() => {
-        console.log(currentGame);
         if (currentGame.game_state === GameState.PLACING_TILE) {
             getAvailableSpotsForTilePlacement();
         }
@@ -166,6 +185,7 @@ export default function PlayGame() {
                     setZoomFactor={setZoomFactor}
                     canvasInteractionState={canvasInteractionState}
                     placeTile={placeTile}
+                    placeSanctum={placeSanctum}
                     gameCanvasRef={gameCanvasRef}
                     gameState={currentGame.game_state}
                 />

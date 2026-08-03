@@ -93,7 +93,6 @@ class TileController extends Controller
                 $game->game_state = GameState::PLACING_SANCTUM;
                 $game->save();
             }
-            //$this->placeSanctum($request->boardId);
         }
 
         $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
@@ -126,6 +125,13 @@ class TileController extends Controller
             $connectedAdjacencies, 
             fn($dir1, $dir2) => $dir1->value <=> $dir2->value
         );
+
+        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::ROTATING_TILE) {
+            return response()->json([
+                'error' => 'Cannot place tile!',
+                'message' => 'Must resolve other actions before rotating tile!',
+            ], 409);
+        }
 
         if (count($intersectingAdjacencies) === 0) {
             return response()->json([
@@ -171,6 +177,18 @@ class TileController extends Controller
             'message' => 'Tile rotation has been confirmed!',
             'game' => $activeGame,
         ], 200);
+    }
+
+    public function placeSanctum(Request $request)
+    {
+        \Log::info($request);
+        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::PLACING_SANCTUM) {
+            return response()->json([
+                'error' => 'Cannot place sanctum!',
+                'message' => 'Must resolve other actions before placing sanctum!',
+            ], 409);
+        }
+        //$this->placeSanctumTile($request->boardId);
     }
 
     public function getAvailableSpotsForTilePlacement()
@@ -232,7 +250,7 @@ class TileController extends Controller
         $baggedTile->delete();
     }
 
-    private function placeSanctum(int $boardId)
+    private function placeSanctumTile(int $boardId)
     {
         //First is a stop gap until UI to choose a sanctum location is implemented!
         $furthestSubtile = PlacedSubtile::where('y_coordinate', PlacedSubtile::max('y_coordinate'))->first();

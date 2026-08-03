@@ -24,6 +24,7 @@ type Props = {
     setZoomFactor: Dispatch<SetStateAction<number>>;
     canvasInteractionState: CanvasInteractionState;
     placeTile: (coordinate: Coordinate) => void;
+    placeSanctum: (coordinate: Coordinate) => void;
     gameCanvasRef: React.RefObject<HTMLCanvasElement | null>;
     gameState: GameState
 };
@@ -37,6 +38,7 @@ export default function GameCanvas({
     setZoomFactor,
     canvasInteractionState,
     placeTile,
+    placeSanctum,
     gameCanvasRef,
     gameState
 }: Props) {
@@ -97,7 +99,12 @@ export default function GameCanvas({
                 );
 
                 if (coordinate) {
-                    placeTile(coordinate);
+                    if (gameState === GameState.PLACING_TILE) {
+                        placeTile(coordinate);
+                    }
+                    else if (gameState === GameState.PLACING_SANCTUM) {
+                        placeSanctum(coordinate);
+                    }
                 }
             }
         }
