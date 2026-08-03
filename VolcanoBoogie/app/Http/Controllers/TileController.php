@@ -90,8 +90,17 @@ class TileController extends Controller
             //Need to let user rotate the tile if option is available before moving onto
             //sanctum placement.
             if ($game->game_state !== GameState::ROTATING_TILE) {
-                $game->game_state = GameState::PLACING_SANCTUM;
-                $game->save();
+                $placementCandidates = $this->getPlacementCandidatesForSanctum();
+
+                //Multiple candidates, let user choose where to place sanctum.
+                if (count($placementCandidates) > 1) {
+                    $game->game_state = GameState::PLACING_SANCTUM;
+                    $game->save();
+                }
+                //Only one viable candidate, automatically place it.
+                else if (count($placementCandidates) === 1) {
+                    $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
+                }
             }
         }
 
@@ -162,7 +171,24 @@ class TileController extends Controller
         //Change game state if there are no tiles left to be rotated.
         if (count($pendingTiles) === 0) {
             $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
-            $game->game_state = $this->isOnlySanctumRemaining() ? GameState::PLACING_SANCTUM : GameState::PLACING_TILE;
+
+            if ($this->isOnlySanctumRemaining()) {
+                $placementCandidates = $this->getPlacementCandidatesForSanctum();
+
+                //Multiple candidates, let user choose where to place sanctum.
+                if (count($placementCandidates) > 1) {
+                    $game->game_state = GameState::PLACING_SANCTUM;
+                    $game->save();
+                }
+                //Only one viable candidate, automatically place it.
+                else if (count($placementCandidates) === 1) {
+                    $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
+                }
+            }
+            else {
+                $game->game_state = GameState::PLACING_TILE;
+            }
+
             $game->save();
         }
 
