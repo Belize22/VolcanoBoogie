@@ -159,6 +159,7 @@ class TileController extends Controller
         //Confirm placement.
         $tile = PlacedTile::find($request->pendingTiles[0]['id']);
         $tile->placement_status = PlacementStatus::PLACED;
+        $tile->rotation = $requestSubtile['rotation'];
         $tile->save();
 
         //Update rotation.
@@ -183,6 +184,7 @@ class TileController extends Controller
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
                     $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
+                    $game->game_state = GameState::PLACING_TILE;
                 }
             }
             else {
@@ -275,6 +277,7 @@ class TileController extends Controller
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
             'tile_id' => $baggedTile->tile_id,
+            'rotation' => $connectedAdjacencies[0],
             'placement_status' => $this->isRotateable($connectedAdjacencies, $pathType) 
                 ? PlacementStatus::PENDING : PlacementStatus::PLACED,
         ]);
@@ -316,6 +319,7 @@ class TileController extends Controller
         $placedTile = PlacedTile::create([
             'board_id' => $boardId,
             'tile_id' => $sanctum->tile_id,
+            'rotation' => Rotation::flip($connectedAdjacencies[0]),
             'placement_status' => PlacementStatus::PLACED,
         ]);
         PlacedSubtile::create([

@@ -9,8 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\Board;
 use App\Enums\PlacementStatus;
+use App\Enums\Rotation;
 
-#[Fillable(['board_id', 'tile_id', 'placement_status'])]
+#[Fillable(['board_id', 'tile_id', 'rotation', 'placement_status'])]
 class PlacedTile extends Model
 {
     protected $hidden = ['created_at', 'updated_at'];
@@ -40,6 +41,7 @@ class PlacedTile extends Model
         return [
             'board_id' => 'integer',
             'tile_id' => 'integer',
+            'rotation' => Rotation::class,
             'placement_status' => PlacementStatus::class,
             'anchor' => 'array',
         ];

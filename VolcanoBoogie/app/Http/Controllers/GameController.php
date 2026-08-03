@@ -72,6 +72,7 @@ class GameController extends Controller
             $placedTile = PlacedTile::create([
                 'board_id' => $board->id,
                 'tile_id' => $tile->id,
+                'rotation' => Rotation::NORTH,
                 'placement_status' => PlacementStatus::PLACED,
             ]);
 

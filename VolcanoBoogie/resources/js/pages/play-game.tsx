@@ -145,6 +145,9 @@ export default function PlayGame() {
             //Avoid filtering since we need access to all placed tiles to update
             //currentGame in an immutable fashion.
             if (placedTiles[i].placement_status === PlacementStatus.PENDING) {
+                placedTiles[i].rotation = convertNumericToRotation(
+                    (convertRotationToNumeric(placedTiles[i].rotation) + (isClockwise ? 1 : -1)) % 4
+                )
                 placedTiles[i].placed_subtiles[0].rotation = convertNumericToRotation(
                     (convertRotationToNumeric(placedTiles[i].placed_subtiles[0].rotation) + (isClockwise ? 1 : -1)) % 4
                 )
