@@ -100,6 +100,9 @@ class TileController extends Controller
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
                     $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
+                    if (count($this->retrieveAllConnectingDirections($placementCandidates[0])) > 1) {
+                        $game->game_state = GameState::ROTATING_SANCTUM;
+                    }
                 }
             }
         }
@@ -184,7 +187,12 @@ class TileController extends Controller
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
                     $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
-                    $game->game_state = GameState::PLACING_TILE;
+                    if (count($this->retrieveAllConnectingDirections($placementCandidates[0])) > 1) {
+                        $game->game_state = GameState::ROTATING_SANCTUM;
+                    }
+                    else {
+                        $game->game_state = GameState::PLACING_TILE;
+                    }
                 }
             }
             else {
