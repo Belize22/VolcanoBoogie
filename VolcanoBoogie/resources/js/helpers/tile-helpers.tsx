@@ -37,8 +37,8 @@ export function retrieveTileSize(
     );
 
     //To calculate the tile size adjustments.
-    const diffX = bottomRightmostCoordinate.x - topLeftmostCoordinate.x;
-    const diffY = bottomRightmostCoordinate.y - topLeftmostCoordinate.y;
+    const diffX = Math.abs(bottomRightmostCoordinate.x - topLeftmostCoordinate.x);
+    const diffY = Math.abs(bottomRightmostCoordinate.y - topLeftmostCoordinate.y);
 
     let tileWidth = (adjustedTileSize * (diffX + 1))/2;
     let tileHeight = (adjustedTileSize * (diffY + 1))/2;
@@ -56,14 +56,11 @@ export function retrieveTileSizeWithRotationOffset(
     );
 
     //To calculate the tile size adjustments.
-    const diffX = bottomRightmostCoordinate.x - topLeftmostCoordinate.x;
-    const diffY = bottomRightmostCoordinate.y - topLeftmostCoordinate.y;
-
-    //To account for canvas drawing different directions depending on rotation.
-    const signOffset = (Rotation.SOUTH || Rotation.WEST) ? -1 : 1;
+    const diffX = Math.abs(bottomRightmostCoordinate.x - topLeftmostCoordinate.x);
+    const diffY = Math.abs(bottomRightmostCoordinate.y - topLeftmostCoordinate.y);
 
     let tileWidth = (adjustedTileSize * (diffX + 1))/2;
-    let tileHeight = (adjustedTileSize * ((diffY * signOffset) + 1))/2;
+    let tileHeight = (adjustedTileSize * (diffY + 1))/2;
 
     if (rotation === Rotation.EAST || rotation === Rotation.WEST) {
         //Need to get dimensions of tile pre-rotation for trigonometric manipulation to work

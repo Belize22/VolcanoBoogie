@@ -5,7 +5,9 @@ import { Game } from '@/interfaces/game';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { GameState } from '@/enums/game-state';
+import { PathType } from '@/enums/path-type';
 import { PlacementStatus } from '@/enums/placement-status';
+import { getCoordinateRelativeToDirection } from '@/helpers/coordinate-helpers';
 import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/rotation-helpers';
 import Sidebar from '@/components/play-game/sidebar';
 import Footer from '@/components/play-game/footer';
@@ -187,6 +189,55 @@ export default function PlayGame() {
         )
     }
 
+    function rotateSanctum(isClockwise: boolean) {
+        const previousGame = currentGame;
+        const placedTiles = currentGame.board.placed_tiles;
+        const sanctumIndex = placedTiles.findIndex(placed_tile => placed_tile.tile_id === 2);
+
+        if (sanctumIndex >= 0) {
+            const keyChamberIndex = placedTiles[sanctumIndex].placed_subtiles.findIndex(
+                placed_subtile => placed_subtile.path_type === PathType.STRAIGHT
+            )
+            const artifactChamberIndex = placedTiles[sanctumIndex].placed_subtiles.findIndex(
+                placed_subtile => placed_subtile.path_type === PathType.DEAD_END
+            )
+
+            if (keyChamberIndex >= 0 && artifactChamberIndex >= 0) {
+                const flippedPrevRotation = convertNumericToRotation(
+                    (convertRotationToNumeric(placedTiles[sanctumIndex].rotation) + 2) % 4
+                );
+                const currentRotation = convertNumericToRotation(
+                    (convertRotationToNumeric(placedTiles[sanctumIndex].rotation) + (isClockwise ? 1 : 3)) % 4
+                );
+                const flippedCurrentRotation = convertNumericToRotation(
+                    (convertRotationToNumeric(currentRotation) + 2) % 4
+                );
+
+                const adjustedArtifactCoordinate = getCoordinateRelativeToDirection(
+                    getCoordinateRelativeToDirection(
+                        placedTiles[sanctumIndex].placed_subtiles[artifactChamberIndex].coordinate, 
+                        flippedPrevRotation
+                    ), currentRotation
+                );
+
+                placedTiles[sanctumIndex].rotation = currentRotation;
+                placedTiles[sanctumIndex].placed_subtiles[keyChamberIndex].rotation = flippedCurrentRotation;
+                placedTiles[sanctumIndex].placed_subtiles[artifactChamberIndex].rotation = currentRotation;
+                placedTiles[sanctumIndex].placed_subtiles[artifactChamberIndex].coordinate = adjustedArtifactCoordinate;
+            }
+
+            setCurrentGame(
+                {
+                    ...previousGame,
+                    board: {
+                        ...previousGame.board,
+                        placed_tiles: placedTiles
+                    }
+                }
+            )
+        }
+    }
+
     useEffect(() => {
         if (currentGame.game_state === GameState.PLACING_TILE) {
             getAvailableSpotsForTilePlacement();
@@ -225,6 +276,7 @@ export default function PlayGame() {
                     setCanvasInteractionState={setCanvasInteractionState}
                     confirmTileRotation={confirmTileRotation}
                     rotateTile={rotateTile}
+                    rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
                 />
             </div>

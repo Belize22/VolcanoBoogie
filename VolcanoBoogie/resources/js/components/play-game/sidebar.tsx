@@ -15,6 +15,7 @@ type Props = {
     setCanvasInteractionState: Dispatch<SetStateAction<CanvasInteractionState>>;
     confirmTileRotation: () => void;
     rotateTile: (isClockwise: boolean) => void;
+    rotateSanctum: (isClockwise: boolean) => void;
     gameState: GameState;
 };
 
@@ -28,6 +29,7 @@ export default function Sidebar({
     setCanvasInteractionState,
     confirmTileRotation,
     rotateTile,
+    rotateSanctum,
     gameState
 }: Props) {
     return (
@@ -44,7 +46,7 @@ export default function Sidebar({
             {(gameState === GameState.ROTATING_TILE || gameState === GameState.ROTATING_SANCTUM) && 
                 <RotationPane
                     confirmTileRotation={confirmTileRotation}
-                    rotateTile={rotateTile}
+                    rotateTile={gameState === GameState.ROTATING_TILE ? rotateTile : rotateSanctum}
                 />
             }
         </div>

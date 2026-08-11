@@ -1,3 +1,5 @@
+import { Rotation } from '@/enums/rotation';
+import { Coordinate } from '@/interfaces/coordinate';
 import { PlacedSubtile } from '@/interfaces/placed-subtile';
 
 export function retrieveTopLeftCoordAndBottomRightCoord(
@@ -15,4 +17,19 @@ export function retrieveTopLeftCoordAndBottomRightCoord(
     );
 
     return {topLeftmostCoordinate, bottomRightmostCoordinate};
+}
+
+export function getCoordinateRelativeToDirection(coordinate: Coordinate, rotation: Rotation) {
+    if (rotation === Rotation.NORTH) {
+        return {x: coordinate.x, y: coordinate.y + 1};
+    }
+    else if (rotation === Rotation.EAST) {
+        return {x: coordinate.x + 1, y: coordinate.y};
+    }
+    else if (rotation === Rotation.SOUTH) {
+        return {x: coordinate.x, y: coordinate.y - 1};
+    }    
+    else { //WEST
+        return {x: coordinate.x - 1, y: coordinate.y};
+    }
 }
