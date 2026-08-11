@@ -1,7 +1,7 @@
 import { Coordinate } from '@/interfaces/coordinate';
 import { PlacedTile } from '@/interfaces/placed-tile';
 import { convertRotationToNumeric } from '@/helpers/rotation-helpers';
-import { retrieveTileCenter } from '@/helpers/tile-helpers';
+import { retrieveTileCenter, retrieveTileSize } from '@/helpers/tile-helpers';
 
 export function drawTiles(
     canvas: HTMLCanvasElement, 
@@ -37,12 +37,18 @@ export function drawTiles(
                     adjustedTileSize
                 )
 
+                const {tileWidth, tileHeight} = retrieveTileSize(
+                    placedTiles[i].placed_subtiles,
+                    placedTiles[i].rotation,
+                    adjustedTileSize
+                )
+
                 context.translate(tileCenterX, tileCenterY); //Make center of tile the pivot point of rotation.
                 context.rotate(rotationDegrees); //Rotate the tile to its proper orientation.
                 context.drawImage(
                     image, 
-                    -adjustedTileSize/2, //Conversion from center defined square to top-left defined square.
-                    -adjustedTileSize/2,
+                    -tileWidth, //Conversion from center defined square to top-left defined square.
+                    -tileHeight,
                     image.naturalWidth * zoomFactor,
                     image.naturalHeight * zoomFactor
                 )
