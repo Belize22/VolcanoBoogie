@@ -7,6 +7,7 @@ use App\Http\Controllers\TileController;
 Route::post('/place-tile', [TileController::class, 'placeTile'])->name('place-tile');
 Route::post('/confirm-tile-rotation', [TileController::class, 'confirmTileRotation'])->name('confirm-tile-rotation');
 Route::post('/place-sanctum', [TileController::class, 'placeSanctum'])->name('place-sanctum');
+Route::post('/confirm-sanctum-rotation', [TileController::class, 'confirmSanctumRotation'])->name('confirm-sanctum-rotation');
 Route::get('/get-tile-placement-candidates', [TileController::class, 'getAvailableSpotsForTilePlacement'])->name('get-tile-placement-candidates');
 Route::get('/get-sanctum-placement-candidates', [TileController::class, 'getAvailableSpotsForSanctumPlacement'])->name('get-sanctum-placement-candidates');
 

@@ -98,6 +98,27 @@ export default function PlayGame() {
         });
     }
 
+    function confirmSanctumRotation() {
+        fetch('/api/confirm-sanctum-rotation', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({boardId: currentGame.board.id})
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                console.log(data);
+                //setCurrentGame(data.game);
+            }
+            else if (data.error) {
+                console.log(data);
+            }
+        });
+    }
+
     function getAvailableSpotsForTilePlacement() {
         fetch('/api/get-tile-placement-candidates', {
             method: 'GET',
@@ -173,6 +194,7 @@ export default function PlayGame() {
         if (currentGame.game_state === GameState.PLACING_SANCTUM) {
             getAvailableSpotsForSanctumPlacement();
         }
+        confirmSanctumRotation();
     }, [currentGame.board]);
     
     return (

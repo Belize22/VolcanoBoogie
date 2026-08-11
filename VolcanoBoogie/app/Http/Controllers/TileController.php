@@ -241,6 +241,21 @@ class TileController extends Controller
         ], 200);
     }
 
+    public function confirmSanctumRotation(Request $request)
+    {
+        $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
+            'board.placedTiles.anchor',
+            'board.placedTiles.tile',
+            'board.placedTiles.placedSubtiles',
+        ])->first();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Endpoint has been hit!',
+            'game' => $activeGame,
+        ], 200);
+    }
+
     public function getAvailableSpotsForTilePlacement()
     {
         $subtileGraph = $this->getSubtileGraph();

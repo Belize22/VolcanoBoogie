@@ -23,8 +23,6 @@ export function drawTiles(
         for (let i = 0; i < placedTiles.length; i++) {
             const image = new Image();
 
-            console.log("Tile Type: " + placedTiles[i].tile.tile_type);
-
             image.src = `http://localhost:8000/storage/images/${placedTiles[i].tile.tile_type}.png`
             image.onload = () => {
                 const rotationOffset = convertRotationToNumeric(placedTiles[i].rotation);
