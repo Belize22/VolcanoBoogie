@@ -1,7 +1,7 @@
 import { Coordinate } from '@/interfaces/coordinate';
 import { PlacedTile } from '@/interfaces/placed-tile';
 import { convertRotationToNumeric } from '@/helpers/rotation-helpers';
-import { retrieveTileCenter, retrieveTileSize } from '@/helpers/tile-helpers';
+import { retrieveTileCenter, retrieveTileSizeWithRotationOffset } from '@/helpers/tile-helpers';
 
 export function drawTiles(
     canvas: HTMLCanvasElement, 
@@ -35,7 +35,7 @@ export function drawTiles(
                     adjustedTileSize
                 )
 
-                const {tileWidth, tileHeight} = retrieveTileSize(
+                const {tileWidth, tileHeight} = retrieveTileSizeWithRotationOffset(
                     placedTiles[i].placed_subtiles,
                     placedTiles[i].rotation,
                     adjustedTileSize

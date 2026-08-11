@@ -1,6 +1,6 @@
 import { Coordinate } from '@/interfaces/coordinate';
 import { PlacedTile } from '@/interfaces/placed-tile';
-import { retrieveTileCenter } from '@/helpers/tile-helpers';
+import { retrieveTileCenter, retrieveTileSize } from '@/helpers/tile-helpers';
 
 export function clearCanvas(canvas: HTMLCanvasElement) {
     const context = canvas.getContext("2d");
@@ -144,13 +144,18 @@ export function applyShadowOverlay(
             canvasCenter,
             adjustedTileSize
         )
-
-        context.translate(tileCenterX,tileCenterY); //Make center of tile the pivot point of rotation.
-        context.clearRect(
-            -adjustedTileSize/2, //Conversion from center defined square to top-left defined square.
-            -adjustedTileSize/2,
-            adjustedTileSize,
+        
+        const {tileWidth, tileHeight} = retrieveTileSize(
+            pendingTiles[0].placed_subtiles,
             adjustedTileSize
+        )
+
+        context.translate(tileCenterX, tileCenterY); //Make center of tile the pivot point of rotation.
+        context.clearRect(
+            -tileWidth, //Conversion from center defined square to top-left defined square.
+            -tileHeight,
+            tileWidth * 2,
+            tileHeight * 2
         )
 
         //Translation must be isolated at the scope of a tile placement.

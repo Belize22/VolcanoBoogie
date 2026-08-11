@@ -41,7 +41,7 @@ export default function Sidebar({
                 canvasInteractionState={canvasInteractionState}
                 setCanvasInteractionState={setCanvasInteractionState}
             />
-            {gameState === GameState.ROTATING_TILE && 
+            {(gameState === GameState.ROTATING_TILE || gameState === GameState.ROTATING_SANCTUM) && 
                 <RotationPane
                     confirmTileRotation={confirmTileRotation}
                     rotateTile={rotateTile}

@@ -63,10 +63,13 @@ export default function GameCanvas({
         }
 
         if (uiOverlayRef.current !== null) {
-            if (gameState === GameState.ROTATING_TILE) {
+            if (gameState === GameState.ROTATING_TILE || gameState === GameState.ROTATING_SANCTUM) {
+                const tiles = gameState === GameState.ROTATING_TILE ? 
+                    board.placed_tiles.filter(placed_tile => placed_tile.placement_status === PlacementStatus.PENDING) :
+                    board.placed_tiles.filter(placed_tile => placed_tile.tile_id === 2)
                 applyShadowOverlay(
                     uiOverlayRef.current,
-                    board.placed_tiles.filter(placed_tile => placed_tile.placement_status === PlacementStatus.PENDING),
+                    tiles,
                     TILE_SIZE,
                     canvasCenter,
                     zoomFactor
@@ -132,10 +135,13 @@ export default function GameCanvas({
                     highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter, zoomFactor);
                     highlightPlacementCandidates(canvas, TILE_SIZE, canvasCenter, zoomFactor, availableSpots);
                 }
-                else if (gameState === GameState.ROTATING_TILE) {
+                else if (gameState === GameState.ROTATING_TILE || gameState === GameState.ROTATING_SANCTUM) {
+                    const tiles = gameState === GameState.ROTATING_TILE ? 
+                        board.placed_tiles.filter(placed_tile => placed_tile.placement_status === PlacementStatus.PENDING) :
+                        board.placed_tiles.filter(placed_tile => placed_tile.tile_id === 2)
                     applyShadowOverlay(
                         uiOverlayRef.current,
-                        board.placed_tiles.filter(placed_tile => placed_tile.placement_status === PlacementStatus.PENDING),
+                        tiles,
                         TILE_SIZE,
                         canvasCenter,
                         zoomFactor

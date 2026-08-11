@@ -30,6 +30,24 @@ export function retrieveTileCenter(
 
 export function retrieveTileSize(
     placedSubtiles: PlacedSubtile[],
+    adjustedTileSize: number,
+) {
+    const {topLeftmostCoordinate, bottomRightmostCoordinate} = retrieveTopLeftCoordAndBottomRightCoord(
+        placedSubtiles
+    );
+
+    //To calculate the tile size adjustments.
+    const diffX = bottomRightmostCoordinate.x - topLeftmostCoordinate.x;
+    const diffY = bottomRightmostCoordinate.y - topLeftmostCoordinate.y;
+
+    let tileWidth = (adjustedTileSize * (diffX + 1))/2;
+    let tileHeight = (adjustedTileSize * (diffY + 1))/2;
+
+    return {tileWidth, tileHeight};
+}
+
+export function retrieveTileSizeWithRotationOffset(
+    placedSubtiles: PlacedSubtile[],
     rotation: Rotation,
     adjustedTileSize: number,
 ) {
