@@ -99,9 +99,12 @@ class TileController extends Controller
                 }
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
-                    $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
-                    if (count($this->retrieveAllConnectingDirections($placementCandidates[0])) > 1) {
+                    $connectingTilesCount = count($this->retrieveAllConnectingDirections($placementCandidates[0]));
+                    $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
+                    $this->placeSanctumTile($request->boardId, $placementCandidates[0], $placementStatus);
+                    if ($connectingTilesCount > 1) {
                         $game->game_state = GameState::ROTATING_SANCTUM;
+                        $game->save();
                     }
                 }
             }
@@ -186,8 +189,10 @@ class TileController extends Controller
                 }
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
-                    $this->placeSanctumTile($request->boardId, $placementCandidates[0]);
-                    if (count($this->retrieveAllConnectingDirections($placementCandidates[0])) > 1) {
+                    $connectingTilesCount = count($this->retrieveAllConnectingDirections($placementCandidates[0]));
+                    $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
+                    $this->placeSanctumTile($request->boardId, $placementCandidates[0], $placementStatus);
+                    if ($connectingTilesCount > 1) {
                         $game->game_state = GameState::ROTATING_SANCTUM;
                     }
                     else {
@@ -234,7 +239,15 @@ class TileController extends Controller
             ], 409);
         }
 
-        $this->placeSanctumTile($request->boardId, $coordinate);
+        $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+        $connectingTilesCount = count($this->retrieveAllConnectingDirections($coordinate));
+        $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
+        $this->placeSanctumTile($request->boardId, $coordinate, $placementStatus);
+        
+        if ($connectingTilesCount > 1) {
+            $game->game_state = GameState::ROTATING_SANCTUM;
+            $game->save();
+        }
 
         $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
             'board.placedTiles.anchor',
@@ -324,7 +337,7 @@ class TileController extends Controller
         $baggedTile->delete();
     }
 
-    private function placeSanctumTile(int $boardId, Coordinate $coordinate)
+    private function placeSanctumTile(int $boardId, Coordinate $coordinate, PlacementStatus $placementStatus)
     {
         $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
 
@@ -343,7 +356,7 @@ class TileController extends Controller
             'board_id' => $boardId,
             'tile_id' => $sanctum->tile_id,
             'rotation' => Rotation::flip($connectedAdjacencies[0]),
-            'placement_status' => PlacementStatus::PLACED,
+            'placement_status' => $placementStatus,
         ]);
         PlacedSubtile::create([
             'placed_tile_id' => $placedTile->id,

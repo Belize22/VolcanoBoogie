@@ -192,7 +192,9 @@ export default function PlayGame() {
     function rotateSanctum(isClockwise: boolean) {
         const previousGame = currentGame;
         const placedTiles = currentGame.board.placed_tiles;
-        const sanctumIndex = placedTiles.findIndex(placed_tile => placed_tile.tile_id === 2);
+        const sanctumIndex = placedTiles.findIndex(
+            placed_tile => placed_tile.placement_status === PlacementStatus.PENDING
+        );
 
         if (sanctumIndex >= 0) {
             const keyChamberIndex = placedTiles[sanctumIndex].placed_subtiles.findIndex(
