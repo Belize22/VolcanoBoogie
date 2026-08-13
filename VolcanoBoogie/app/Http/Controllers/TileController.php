@@ -295,6 +295,35 @@ class TileController extends Controller
                 \Log::info($changedDirection->value);
                 \Log::info(json_encode($keyChamber->coordinate));
                 \Log::info(json_encode($newCoordinate));
+
+                $existingSubtile = PlacedSubtile::whereNot('placed_tile_id', $sanctumTile->id)
+                    ->where('x_coordinate', $newCoordinate->x)
+                    ->where('y_coordinate', $newCoordinate->y)
+                    ->get();
+                
+                \Log::info($existingSubtile);
+
+                if (count($existingSubtile) === 0) {
+                    //TODO: Implement validation that sanctum tile actually connects to another tile.
+                    
+                    //TODO: Test that this implementation works
+                    /*
+                    $sanctumTile->rotation = $changedDirection;
+                    $keyChamber->rotation = Rotation::flip($changedDirection);
+                    $artifactChamber->rotation = $changedDirection;
+                    $artifactChamber->coordinate = $newCoordinate;
+                    
+                    $sanctumTile->save();
+                    $keyChamber->save();
+                    $artifactChamber->save();
+                    */
+                }
+                else {
+                    return response()->json([
+                        'error' => 'Improper sanctum rotation!',
+                        'message' => 'Tile overlaps with another tile!',
+                    ], 409);
+                }
             }
         }
 
