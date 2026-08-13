@@ -243,7 +243,7 @@ class TileController extends Controller
         $connectingTilesCount = count($this->retrieveAllConnectingDirections($coordinate));
         $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
         $this->placeSanctumTile($request->boardId, $coordinate, $placementStatus);
-        
+
         if ($connectingTilesCount > 1) {
             $game->game_state = GameState::ROTATING_SANCTUM;
             $game->save();
@@ -264,6 +264,40 @@ class TileController extends Controller
 
     public function confirmSanctumRotation(Request $request)
     {
+        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::ROTATING_SANCTUM) {
+            return response()->json([
+                'error' => 'Cannot place tile!',
+                'message' => 'Must resolve other actions before rotating sanctum!',
+            ], 409);
+        }
+
+        $changedDirection = Rotation::from($request->pendingTiles[0]['rotation']);
+
+        $sanctumTile = PlacedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
+            ->where('placement_status', PlacementStatus::PENDING)
+            ->first();
+
+        if ($sanctumTile) {
+            $keyChamber = PlacedSubtile::where('placed_tile_id', $sanctumTile->id)
+                ->where('path_type', PathType::STRAIGHT)
+                ->first();
+            $artifactChamber = PlacedSubtile::where('placed_tile_id', $sanctumTile->id)
+                ->where('path_type', PathType::DEAD_END)
+                ->first();
+
+            if (!empty($keyChamber) && !empty($artifactChamber))
+            {
+                $originalDirection = $sanctumTile->rotation;
+                $newCoordinate = Rotation::getCoordinateRelativeToDirection(
+                    new Coordinate($keyChamber->coordinate->x, $keyChamber->coordinate->y), 
+                    $changedDirection
+                );
+                \Log::info($changedDirection->value);
+                \Log::info(json_encode($keyChamber->coordinate));
+                \Log::info(json_encode($newCoordinate));
+            }
+        }
+
         $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
             'board.placedTiles.anchor',
             'board.placedTiles.tile',

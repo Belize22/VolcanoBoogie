@@ -107,7 +107,12 @@ export default function PlayGame() {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({boardId: currentGame.board.id})
+            body: JSON.stringify({
+                boardId: currentGame.board.id, 
+                pendingTiles: currentGame.board.placed_tiles.filter(
+                    placed_tile => placed_tile.placement_status === PlacementStatus.PENDING
+                )
+            })
         })
         .then((response) => response.json())
         .then((data) => {
@@ -247,7 +252,7 @@ export default function PlayGame() {
         if (currentGame.game_state === GameState.PLACING_SANCTUM) {
             getAvailableSpotsForSanctumPlacement();
         }
-        confirmSanctumRotation();
+        console.log(currentGame);
     }, [currentGame.board]);
     
     return (
@@ -277,6 +282,7 @@ export default function PlayGame() {
                     canvasInteractionState={canvasInteractionState}
                     setCanvasInteractionState={setCanvasInteractionState}
                     confirmTileRotation={confirmTileRotation}
+                    confirmSanctumRotation={confirmSanctumRotation}
                     rotateTile={rotateTile}
                     rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
