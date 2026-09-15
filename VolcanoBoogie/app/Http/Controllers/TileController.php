@@ -288,13 +288,25 @@ class TileController extends Controller
             if (!empty($keyChamber) && !empty($artifactChamber))
             {
                 $originalDirection = $sanctumTile->rotation;
+                $keyChamberCoordinates = new Coordinate($keyChamber->coordinate->x, $keyChamber->coordinate->y);
                 $newCoordinate = Rotation::getCoordinateRelativeToDirection(
-                    new Coordinate($keyChamber->coordinate->x, $keyChamber->coordinate->y), 
+                    $keyChamberCoordinates, 
                     $changedDirection
                 );
                 \Log::info($changedDirection->value);
                 \Log::info(json_encode($keyChamber->coordinate));
                 \Log::info(json_encode($newCoordinate));
+
+                $connectingDirections = $this->retrieveAllConnectingDirections(
+                    $keyChamberCoordinates
+                );
+
+                if (!in_array(Rotation::flip($changedDirection), $connectingDirections)) {
+                    return response()->json([
+                        'error' => 'Improper sanctum rotation!',
+                        'message' => 'Sanctum does not connect to the rest of the map!',
+                    ], 409);
+                }
 
                 $existingSubtile = PlacedSubtile::whereNot('placed_tile_id', $sanctumTile->id)
                     ->where('x_coordinate', $newCoordinate->x)
@@ -303,27 +315,24 @@ class TileController extends Controller
                 
                 \Log::info($existingSubtile);
 
-                if (count($existingSubtile) === 0) {
-                    //TODO: Implement validation that sanctum tile actually connects to another tile.
-                    
-                    //TODO: Test that this implementation works
-                    /*
-                    $sanctumTile->rotation = $changedDirection;
-                    $keyChamber->rotation = Rotation::flip($changedDirection);
-                    $artifactChamber->rotation = $changedDirection;
-                    $artifactChamber->coordinate = $newCoordinate;
-                    
-                    $sanctumTile->save();
-                    $keyChamber->save();
-                    $artifactChamber->save();
-                    */
-                }
-                else {
+                if (count($existingSubtile) !== 0) {
                     return response()->json([
                         'error' => 'Improper sanctum rotation!',
-                        'message' => 'Tile overlaps with another tile!',
+                        'message' => 'Sanctum overlaps with another tile!',
                     ], 409);
                 }
+                    
+                //TODO: Test that this implementation works
+                /*
+                $sanctumTile->rotation = $changedDirection;
+                $keyChamber->rotation = Rotation::flip($changedDirection);
+                $artifactChamber->rotation = $changedDirection;
+                $artifactChamber->coordinate = $newCoordinate;
+                
+                $sanctumTile->save();
+                $keyChamber->save();
+                $artifactChamber->save();
+                */
             }
         }
 
@@ -534,14 +543,21 @@ class TileController extends Controller
 
     private function retrieveAdjacentSubtileCandidates($coordinate)
     {
+        //Safe assumption since this gets placed last for the most part.
+        //In scenarios where it isn't placed last, it can be safely ignores since it is guaranteed to have
+        //no open connections.
+        $sanctumTileId = PlacedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->pluck('id');
+        
         //Adjacent subtiles for cardinal directions only! Also don't include the initial tile being compared to.
-        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate) {
+        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate, $sanctumTileId) {
             $query->whereIn('x_coordinate', [$coordinate->x - 1, $coordinate->x + 1])
-                ->where('y_coordinate', $coordinate->y);
+                ->where('y_coordinate', $coordinate->y)
+                ->whereNotIn('placed_tile_id', $sanctumTileId);
         })
-        ->orWhere(function ($query) use ($coordinate) {
+        ->orWhere(function ($query) use ($coordinate, $sanctumTileId) {
             $query->whereIn('y_coordinate', [$coordinate->y - 1, $coordinate->y + 1])
-                ->where('x_coordinate', $coordinate->x);
+                ->where('x_coordinate', $coordinate->x)
+                ->whereNotIn('placed_tile_id', $sanctumTileId);
         })->get();
 
         return $subtileCandidates;
