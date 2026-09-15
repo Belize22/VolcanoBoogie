@@ -117,8 +117,7 @@ export default function PlayGame() {
         .then((response) => response.json())
         .then((data) => {
             if (data.success) {
-                console.log(data);
-                //setCurrentGame(data.game);
+                setCurrentGame(data.game);
             }
             else if (data.error) {
                 console.log(data);

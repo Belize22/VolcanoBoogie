@@ -321,18 +321,21 @@ class TileController extends Controller
                         'message' => 'Sanctum overlaps with another tile!',
                     ], 409);
                 }
-                    
-                //TODO: Test that this implementation works
-                /*
+
                 $sanctumTile->rotation = $changedDirection;
+                $sanctumTile->placement_status = PlacementStatus::PLACED;
                 $keyChamber->rotation = Rotation::flip($changedDirection);
                 $artifactChamber->rotation = $changedDirection;
-                $artifactChamber->coordinate = $newCoordinate;
+                $artifactChamber->x_coordinate = $newCoordinate->x;
+                $artifactChamber->y_coordinate = $newCoordinate->y;
                 
                 $sanctumTile->save();
                 $keyChamber->save();
                 $artifactChamber->save();
-                */
+
+                $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+                $game->game_state = GameState::PLACING_SANCTUM;
+                $game->save();
             }
         }
 
