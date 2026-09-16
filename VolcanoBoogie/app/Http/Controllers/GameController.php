@@ -23,17 +23,15 @@ class GameController extends Controller
 {
     public function playGame(String $id)
     {
-        $activeGame = $this->getActiveGame($id);
-
-        if (!$activeGame) {
-            abort(404);
-        }
-
-        $game = $activeGame::with([
+        $game = Game::with([
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
-        ])->first();
+        ])->where('id', $id)->first();
+
+        if (!$game) {
+            abort(404);
+        }
 
         return Inertia::render('play-game', [
             'game' => $game,
@@ -165,12 +163,6 @@ class GameController extends Controller
             }
         }
 
-        return $game;
-    }
-
-    private function getActiveGame(String $id)
-    {
-        $game = Game::where('id', $id)->first();
         return $game;
     }
 }
