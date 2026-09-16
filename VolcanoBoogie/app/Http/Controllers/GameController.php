@@ -21,12 +21,12 @@ use App\Enums\TileType;
 
 class GameController extends Controller
 {
-    public function playGame()
+    public function playGame(String $id)
     {
-        $activeGame = $this->getActiveGame();
+        $activeGame = $this->getActiveGame($id);
 
         if (!$activeGame) {
-            $activeGame = $this->createGame();
+            abort(404);
         }
 
         $game = $activeGame::with([
@@ -39,6 +39,7 @@ class GameController extends Controller
             'game' => $game,
         ]);
     }
+
     private function createGame()
     {
         $game = Game::create([
@@ -167,9 +168,9 @@ class GameController extends Controller
         return $game;
     }
 
-    private function getActiveGame()
+    private function getActiveGame(String $id)
     {
-        $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+        $game = Game::where('id', $id)->first();
         return $game;
     }
 }
