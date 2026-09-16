@@ -126,7 +126,7 @@ export default function PlayGame() {
     }
 
     function getAvailableSpotsForTilePlacement() {
-        fetch('/api/get-tile-placement-candidates', {
+        fetch('/api/get-tile-placement-candidates/' + game.id, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',

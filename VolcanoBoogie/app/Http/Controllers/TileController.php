@@ -350,9 +350,9 @@ class TileController extends Controller
         ], 200);
     }
 
-    public function getAvailableSpotsForTilePlacement()
+    public function getAvailableSpotsForTilePlacement(String $id)
     {
-        $subtileGraph = $this->getSubtileGraph();
+        $subtileGraph = $this->getSubtileGraph($id);
         $availableSpots = $subtileGraph->findAvailablePlacementsWithBFS();
         return response()->json([
             'success' => true,
@@ -721,9 +721,9 @@ class TileController extends Controller
         return $placementCandidates;
     }
 
-    private function getSubtileGraph(Coordinate $coordinate = NULL, ?Rotation $rotation = NULL)
+    private function getSubtileGraph(String $id, Coordinate $coordinate = NULL, ?Rotation $rotation = NULL)
     {
-        $subtileGraph = new SubtileGraph(1, $coordinate, $rotation);
+        $subtileGraph = new SubtileGraph($id, $coordinate, $rotation);
         return $subtileGraph;
     }
 }
