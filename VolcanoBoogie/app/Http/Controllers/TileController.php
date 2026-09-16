@@ -347,7 +347,7 @@ class TileController extends Controller
         
         return response()->json([
             'success' => true,
-            'message' => 'Endpoint has been hit!',
+            'message' => 'Sanctum rotation has been confirmed!',
             'game' => $activeGame,
         ], 200);
     }
