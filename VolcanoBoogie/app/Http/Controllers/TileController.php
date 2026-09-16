@@ -246,8 +246,11 @@ class TileController extends Controller
 
         if ($connectingTilesCount > 1) {
             $game->game_state = GameState::ROTATING_SANCTUM;
-            $game->save();
         }
+        else {
+            $game->game_state = GameState::GAME_COMPLETE;
+        }
+        $game->save();
 
         $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
             'board.placedTiles.anchor',
@@ -293,9 +296,6 @@ class TileController extends Controller
                     $keyChamberCoordinates, 
                     $changedDirection
                 );
-                \Log::info($changedDirection->value);
-                \Log::info(json_encode($keyChamber->coordinate));
-                \Log::info(json_encode($newCoordinate));
 
                 $connectingDirections = $this->retrieveAllConnectingDirections(
                     $keyChamberCoordinates
@@ -312,8 +312,6 @@ class TileController extends Controller
                     ->where('x_coordinate', $newCoordinate->x)
                     ->where('y_coordinate', $newCoordinate->y)
                     ->get();
-                
-                \Log::info($existingSubtile);
 
                 if (count($existingSubtile) !== 0) {
                     return response()->json([
@@ -334,7 +332,7 @@ class TileController extends Controller
                 $artifactChamber->save();
 
                 $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
-                $game->game_state = GameState::PLACING_SANCTUM;
+                $game->game_state = GameState::GAME_COMPLETE;
                 $game->save();
             }
         }

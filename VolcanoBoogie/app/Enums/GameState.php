@@ -8,4 +8,5 @@ enum GameState: string
     case ROTATING_TILE = "rotating_tile";
     case PLACING_SANCTUM = "placing_sanctum";
     case ROTATING_SANCTUM = "rotating_sanctum";
+    case GAME_COMPLETE = "game_complete";
 }

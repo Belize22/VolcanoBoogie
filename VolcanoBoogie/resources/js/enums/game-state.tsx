@@ -2,5 +2,6 @@ export enum GameState {
     PLACING_TILE = "placing_tile",
     ROTATING_TILE = "rotating_tile",
     PLACING_SANCTUM = "placing_sanctum",
-    ROTATING_SANCTUM = "rotating_sanctum"
+    ROTATING_SANCTUM = "rotating_sanctum",
+    GAME_COMPLETE = "game_complete"
 }
