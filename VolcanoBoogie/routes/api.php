@@ -9,7 +9,7 @@ Route::post('/confirm-tile-rotation', [TileController::class, 'confirmTileRotati
 Route::post('/place-sanctum', [TileController::class, 'placeSanctum'])->name('place-sanctum');
 Route::post('/confirm-sanctum-rotation', [TileController::class, 'confirmSanctumRotation'])->name('confirm-sanctum-rotation');
 Route::get('/get-tile-placement-candidates/{id}', [TileController::class, 'getAvailableSpotsForTilePlacement'])->name('get-tile-placement-candidates');
-Route::get('/get-sanctum-placement-candidates', [TileController::class, 'getAvailableSpotsForSanctumPlacement'])->name('get-sanctum-placement-candidates');
+Route::get('/get-sanctum-placement-candidates/{id}', [TileController::class, 'getAvailableSpotsForSanctumPlacement'])->name('get-sanctum-placement-candidates');
 
 Route::get('/user', function (Request $request) {
     return $request->user();

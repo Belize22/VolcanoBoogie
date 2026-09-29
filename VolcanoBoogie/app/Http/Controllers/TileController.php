@@ -25,14 +25,14 @@ class TileController extends Controller
 {
     public function placeTile(Request $request)
     {
-        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::PLACING_TILE) {
+        if (Game::where('id', $request->boardId)->first()->game_state !== GameState::PLACING_TILE) {
             return response()->json([
                 'error' => 'Cannot place tile!',
                 'message' => 'Must resolve other actions before placing more tiles!',
             ], 409);
         }
 
-        if ($this->areSanctumAndKeysPlaced()) {
+        if ($this->areSanctumAndKeysPlaced($request->boardId)) {
             return response()->json([
                 'error' => 'Sanctum has been placed!',
                 'message' => 'Sanctum has been placed, grab the artifact and escape!',
@@ -41,21 +41,21 @@ class TileController extends Controller
 
         $coordinate = new Coordinate($request->coordinate["x"], $request->coordinate["y"]);
 
-        if ($this->spaceIsOccupied($coordinate)) {
+        if ($this->spaceIsOccupied($coordinate, $request->boardId)) {
             return response()->json([
                 'error' => 'Improper tile placement!',
                 'message' => 'Space is already occupied by another tile!',
             ], 409);
         }
 
-        if ($this->tileOutOfBounds($coordinate)) {
+        if ($this->tileOutOfBounds($coordinate, $request->boardId)) {
             return response()->json([
                 'error' => 'Improper tile placement!',
                 'message' => 'Tile placement is not within the bounds of the board!',
             ], 409);
         }
 
-        if ($this->tileCannotConnectToAnother($coordinate)) {
+        if ($this->tileCannotConnectToAnother($coordinate, $request->boardId)) {
             return response()->json([
                 'error' => 'Improper tile placement!',
                 'message' => 'Tile is unable to connect to another tile from here!',
@@ -68,6 +68,7 @@ class TileController extends Controller
             $sanctumId = Tile::where('tile_type', TileType::SANCTUM)->first()->id;
             $selectedTile = BaggedTile::inRandomOrder()
                 ->whereNotIn('tile_id', [$sanctumId, ...$pulledOutTileIdList])
+                ->where('bag_id', $request->boardId)
                 ->first();
             if ($selectedTile) {
                 array_push($pulledOutTileIdList, $selectedTile->tile_id);
@@ -76,21 +77,23 @@ class TileController extends Controller
                 break;
             }
             $pathType = TileType::tileTypeToPathType(Tile::where('id', $selectedTile->tile_id)->first()->tile_type);
-        } while ($this->placementClosesMap($pathType, $coordinate));
+        } while ($this->placementClosesMap($pathType, $coordinate, $request->boardId));
+
         
         //To account for the off-chance that no tile keeps the map open.
         if ($selectedTile) {
             $this->placeTileAndSubtileOnBoard($selectedTile, $request->boardId, $coordinate);
         }
 
+
         //Early sanctum placement acts as a safeguard for if no tile keeps a map open.
-        if ($this->isOnlySanctumRemaining() || !$selectedTile) {
-            $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+        if ($this->isOnlySanctumRemaining($request->boardId) || !$selectedTile) {
+            $game = Game::where('id', $request->boardId)->first();
 
             //Need to let user rotate the tile if option is available before moving onto
             //sanctum placement.
             if ($game->game_state !== GameState::ROTATING_TILE) {
-                $placementCandidates = $this->getPlacementCandidatesForSanctum();
+                $placementCandidates = $this->getPlacementCandidatesForSanctum($request->boardId);
 
                 //Multiple candidates, let user choose where to place sanctum.
                 if (count($placementCandidates) > 1) {
@@ -99,7 +102,7 @@ class TileController extends Controller
                 }
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
-                    $connectingTilesCount = count($this->retrieveAllConnectingDirections($placementCandidates[0]));
+                    $connectingTilesCount = count($this->retrieveAllConnectingDirections($placementCandidates[0], $request->boardId));
                     $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
                     $this->placeSanctumTile($request->boardId, $placementCandidates[0], $placementStatus);
                     if ($connectingTilesCount > 1) {
@@ -110,7 +113,7 @@ class TileController extends Controller
             }
         }
 
-        $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
+        $activeGame = Game::where('id', $request->boardId)->with([
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
@@ -130,7 +133,7 @@ class TileController extends Controller
         $coordinate = new Coordinate($requestSubtile['coordinate']['x'], $requestSubtile['coordinate']['y']);
         $pathType = PathType::from($requestSubtile['path_type']);
 
-        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate, $request->boardId);
         $tileAdjacencies = Rotation::getAdjacencies($rotation, $pathType);
 
         //Filters out all available directions and only provides the directions relevant to the
@@ -141,7 +144,7 @@ class TileController extends Controller
             fn($dir1, $dir2) => $dir1->value <=> $dir2->value
         );
 
-        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::ROTATING_TILE) {
+        if (Game::where('id', $request->boardId)->first()->game_state !== GameState::ROTATING_TILE) {
             return response()->json([
                 'error' => 'Cannot place tile!',
                 'message' => 'Must resolve other actions before rotating tile!',
@@ -155,7 +158,7 @@ class TileController extends Controller
             ], 409);
         }
 
-        if ($this->orientationClosesMap($pathType, $coordinate, $rotation)) {
+        if ($this->orientationClosesMap($pathType, $coordinate, $rotation, $request->boardId)) {
             return response()->json([
                 'error' => 'Improper tile orientation!',
                 'message' => 'Tile to be rotated will close map with this orientation!',
@@ -173,14 +176,16 @@ class TileController extends Controller
         $subtile->rotation = $requestSubtile['rotation'];
         $subtile->save();
 
-        $pendingTiles = PlacedTile::where('placement_status', PlacementStatus::PENDING)->get();
+        $pendingTiles = PlacedTile::where('placement_status', PlacementStatus::PENDING)
+            ->where('board_id', $request->boardId)
+            ->get();
 
         //Change game state if there are no tiles left to be rotated.
         if (count($pendingTiles) === 0) {
-            $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+            $game = Game::where('id', $request->boardId)->first();
 
-            if ($this->isOnlySanctumRemaining()) {
-                $placementCandidates = $this->getPlacementCandidatesForSanctum();
+            if ($this->isOnlySanctumRemaining($request->boardId)) {
+                $placementCandidates = $this->getPlacementCandidatesForSanctum($request->boardId);
 
                 //Multiple candidates, let user choose where to place sanctum.
                 if (count($placementCandidates) > 1) {
@@ -189,7 +194,7 @@ class TileController extends Controller
                 }
                 //Only one viable candidate, automatically place it.
                 else if (count($placementCandidates) === 1) {
-                    $connectingTilesCount = count($this->retrieveAllConnectingDirections($placementCandidates[0]));
+                    $connectingTilesCount = count($this->retrieveAllConnectingDirections($placementCandidates[0], $request->boardId));
                     $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
                     $this->placeSanctumTile($request->boardId, $placementCandidates[0], $placementStatus);
                     if ($connectingTilesCount > 1) {
@@ -207,7 +212,7 @@ class TileController extends Controller
             $game->save();
         }
 
-        $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
+        $activeGame = Game::where('id', $request->boardId)->with([
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
@@ -222,7 +227,7 @@ class TileController extends Controller
 
     public function placeSanctum(Request $request)
     {
-        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::PLACING_SANCTUM) {
+        if (Game::where('id', $request->boardId)->first()->game_state !== GameState::PLACING_SANCTUM) {
             return response()->json([
                 'error' => 'Cannot place sanctum!',
                 'message' => 'Must resolve other actions before placing sanctum!',
@@ -230,7 +235,7 @@ class TileController extends Controller
         }
 
         $coordinate = new Coordinate($request->coordinate["x"], $request->coordinate["y"]);
-        $availableSpots = $this->getPlacementCandidatesForSanctum();
+        $availableSpots = $this->getPlacementCandidatesForSanctum($request->boardId);
 
         if (!is_numeric(array_search($coordinate, $availableSpots))) {
             return response()->json([
@@ -239,8 +244,8 @@ class TileController extends Controller
             ], 409);
         }
 
-        $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
-        $connectingTilesCount = count($this->retrieveAllConnectingDirections($coordinate));
+        $game = Game::where('id', $request->boardId)->first();
+        $connectingTilesCount = count($this->retrieveAllConnectingDirections($coordinate, $request->boardId));
         $placementStatus = $connectingTilesCount > 1 ? PlacementStatus::PENDING : PlacementStatus::PLACED;
         $this->placeSanctumTile($request->boardId, $coordinate, $placementStatus);
 
@@ -252,7 +257,7 @@ class TileController extends Controller
         }
         $game->save();
 
-        $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
+        $activeGame = Game::where('id', $request->boardId)->with([
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
@@ -267,7 +272,7 @@ class TileController extends Controller
 
     public function confirmSanctumRotation(Request $request)
     {
-        if (Game::where('status', GameStatus::IN_PROGRESS)->first()->game_state !== GameState::ROTATING_SANCTUM) {
+        if (Game::where('id', $request->boardId)->first()->game_state !== GameState::ROTATING_SANCTUM) {
             return response()->json([
                 'error' => 'Cannot place tile!',
                 'message' => 'Must resolve other actions before rotating sanctum!',
@@ -277,6 +282,7 @@ class TileController extends Controller
         $changedDirection = Rotation::from($request->pendingTiles[0]['rotation']);
 
         $sanctumTile = PlacedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
+            ->where('board_id', $request->boardId)
             ->where('placement_status', PlacementStatus::PENDING)
             ->first();
 
@@ -298,7 +304,8 @@ class TileController extends Controller
                 );
 
                 $connectingDirections = $this->retrieveAllConnectingDirections(
-                    $keyChamberCoordinates
+                    $keyChamberCoordinates,
+                    $request->boardId
                 );
 
                 if (!in_array(Rotation::flip($changedDirection), $connectingDirections)) {
@@ -311,6 +318,7 @@ class TileController extends Controller
                 $existingSubtile = PlacedSubtile::whereNot('placed_tile_id', $sanctumTile->id)
                     ->where('x_coordinate', $newCoordinate->x)
                     ->where('y_coordinate', $newCoordinate->y)
+                    ->whereIn('placed_tile_id', PlacedTile::where('board_id', $request->boardId)->pluck('id'))
                     ->get();
 
                 if (count($existingSubtile) !== 0) {
@@ -331,13 +339,13 @@ class TileController extends Controller
                 $keyChamber->save();
                 $artifactChamber->save();
 
-                $game = Game::where('status', GameStatus::IN_PROGRESS)->first();
+                $game = Game::where('id', $request->boardId)->first();
                 $game->game_state = GameState::GAME_COMPLETE;
                 $game->save();
             }
         }
 
-        $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->with([
+        $activeGame = Game::where('id', $request->boardId)->with([
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
@@ -361,9 +369,9 @@ class TileController extends Controller
         ], 200);
     }
 
-    public function getAvailableSpotsForSanctumPlacement(Request $request)
+    public function getAvailableSpotsForSanctumPlacement(Request $request, String $boardId)
     {
-        $availableSpots = $this->getPlacementCandidatesForSanctum();
+        $availableSpots = $this->getPlacementCandidatesForSanctum($boardId);
         return response()->json([
             'success' => true,
             'message' => 'Retrieved candidate spots for sanctum placement!',
@@ -371,14 +379,14 @@ class TileController extends Controller
         ], 200);
     }
 
-    private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, int $boardId, Coordinate $coordinate) {
-        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
+    private function placeTileAndSubtileOnBoard(BaggedTile $baggedTile, String $boardId, Coordinate $coordinate) {
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate, $boardId);
 
         if (empty($connectedAdjacencies)) {
             return;
         }
 
-        $availableAdjacencies = $this->retrieveAllAvailableDirections($coordinate);
+        $availableAdjacencies = $this->retrieveAllAvailableDirections($coordinate, (string) $boardId);
 
         $pathType = TileType::tileTypeToPathType(Tile::where('id', $baggedTile->tile_id)->first()->tile_type);
 
@@ -401,7 +409,7 @@ class TileController extends Controller
         ]);
 
         if ($placedTile->placement_status === PlacementStatus::PENDING) {
-            $activeGame = Game::where('status', GameStatus::IN_PROGRESS)->first();
+            $activeGame = Game::where('id', $boardId)->first();
             $activeGame->game_state = GameState::ROTATING_TILE;
             $activeGame->save();
         }
@@ -412,13 +420,15 @@ class TileController extends Controller
 
     private function placeSanctumTile(int $boardId, Coordinate $coordinate, PlacementStatus $placementStatus)
     {
-        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate);
+        $connectedAdjacencies = $this->retrieveAllConnectingDirections($coordinate, (string) $boardId);
 
         if (empty($connectedAdjacencies)) {
             return;
         }
 
-        $sanctum = BaggedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->first();
+        $sanctum = BaggedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
+            ->where('bag_id', $boardId)
+            ->first();
 
         $artifactCoordinate = Rotation::getCoordinateRelativeToDirection(
             $coordinate, Rotation::flip($connectedAdjacencies[0])
@@ -454,23 +464,31 @@ class TileController extends Controller
         $sanctum->delete();
     }
 
-    private function spaceIsOccupied(Coordinate $coordinate)
+    private function spaceIsOccupied(Coordinate $coordinate, String $id)
     {
         $existingSubtile = PlacedSubtile::where('x_coordinate', $coordinate->x)
             ->where('y_coordinate', $coordinate->y)
+            ->whereIn('placed_tile_id', PlacedTile::where('board_id', $id)->pluck('id'))
             ->count();
 
         return $existingSubtile > 0;
     }
 
-    private function tileOutOfBounds(Coordinate $coordinate)
+    private function tileOutOfBounds(Coordinate $coordinate, String $id)
     {
         //West and east wing tiles act as basis of board boundaries!
         $wingSubtiles = PlacedSubtile::whereIn(
             'placed_tile_id', PlacedTile::whereIn(
-                'tile_id', Tile::whereIn('tile_type', [TileType::WEST_WING, TileType::EAST_WING])->get()->pluck('id')
-            )->get()->pluck('id')
+                'tile_id', Tile::whereIn('tile_type', [TileType::WEST_WING, TileType::EAST_WING])
+                    ->get()
+                    ->pluck('id')
+            )
+            ->where('board_id', $id)
+            ->get()
+            ->pluck('id')
         )->get();
+
+        \Log::info($wingSubtiles);
 
         $minX = $wingSubtiles->min('x_coordinate');
         $maxX = $wingSubtiles->max('x_coordinate');
@@ -479,14 +497,14 @@ class TileController extends Controller
         return ($coordinate->x < $minX || $coordinate->x > $maxX || $coordinate->y < $minY);
     }
 
-    private function tileCannotConnectToAnother(Coordinate $coordinate)
+    private function tileCannotConnectToAnother(Coordinate $coordinate, String $id)
     {
-        return empty($this->retrieveAllConnectingDirections($coordinate));
+        return empty($this->retrieveAllConnectingDirections($coordinate, $id));
     }
 
-    private function retrieveAllConnectingDirections(Coordinate $coordinate)
+    private function retrieveAllConnectingDirections(Coordinate $coordinate, String $id)
     {
-        $subtileCandidates = $this->retrieveAdjacentSubtileCandidates($coordinate);
+        $subtileCandidates = $this->retrieveAdjacentSubtileCandidates($coordinate, $id);
 
         //Nothing adjacent, cannot connect!
         if ($subtileCandidates->count() === 0) {
@@ -511,9 +529,9 @@ class TileController extends Controller
         return $validDirections;
     }
 
-    private function retrieveAllAvailableDirections(Coordinate $coordinate)
+    private function retrieveAllAvailableDirections(Coordinate $coordinate, String $id)
     {
-        $subtileCandidates = $this->retrieveAdjacentSubtileCandidates($coordinate);
+        $subtileCandidates = $this->retrieveAdjacentSubtileCandidates($coordinate, $id);
         $validDirections = [];
 
         //Get directions of all adjacent subtiles.
@@ -534,7 +552,7 @@ class TileController extends Controller
 
         //Delete directions that go to out of bound coordinates.
         foreach($availableDirections as $key => $availableDirection) {
-            if ($this->tileOutOfBounds(Rotation::getCoordinateRelativeToDirection($coordinate, $availableDirection))) {
+            if ($this->tileOutOfBounds(Rotation::getCoordinateRelativeToDirection($coordinate, $availableDirection), $id)) {
                 unset($availableDirections[$key]);
             }
         }
@@ -542,22 +560,26 @@ class TileController extends Controller
         return array_values($availableDirections);
     }
 
-    private function retrieveAdjacentSubtileCandidates($coordinate)
+    private function retrieveAdjacentSubtileCandidates($coordinate, String $boardId)
     {
         //Safe assumption since this gets placed last for the most part.
         //In scenarios where it isn't placed last, it can be safely ignores since it is guaranteed to have
         //no open connections.
-        $sanctumTileId = PlacedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->pluck('id');
+        $sanctumTileId = PlacedTile::where('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
+            ->where('board_id', $boardId)
+            ->pluck('id');
         
         //Adjacent subtiles for cardinal directions only! Also don't include the initial tile being compared to.
-        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate, $sanctumTileId) {
+        $subtileCandidates = PlacedSubtile::where(function ($query) use ($coordinate, $boardId, $sanctumTileId) {
             $query->whereIn('x_coordinate', [$coordinate->x - 1, $coordinate->x + 1])
                 ->where('y_coordinate', $coordinate->y)
+                ->whereIn('placed_tile_id', PlacedTile::where('board_id', $boardId)->pluck('id'))
                 ->whereNotIn('placed_tile_id', $sanctumTileId);
         })
-        ->orWhere(function ($query) use ($coordinate, $sanctumTileId) {
+        ->orWhere(function ($query) use ($coordinate, $boardId, $sanctumTileId) {
             $query->whereIn('y_coordinate', [$coordinate->y - 1, $coordinate->y + 1])
                 ->where('x_coordinate', $coordinate->x)
+                ->whereIn('placed_tile_id', PlacedTile::where('board_id', $boardId)->pluck('id'))
                 ->whereNotIn('placed_tile_id', $sanctumTileId);
         })->get();
 
@@ -594,24 +616,29 @@ class TileController extends Controller
         return true;
     }
 
-    private function areSanctumAndKeysPlaced()
+    private function areSanctumAndKeysPlaced(String $boardId)
     {
-        $tileCount = PlacedTile::whereIn('tile_id', Tile::whereIn('tile_type', [TileType::SANCTUM, TileType::KEY_CHAMBER])->pluck('id'))->count();
+        $tileCount = PlacedTile::whereIn('tile_id', Tile::whereIn('tile_type', [TileType::SANCTUM, TileType::KEY_CHAMBER])
+            ->where('board_id', $boardId)
+            ->pluck('id'))
+            ->count();
         return $tileCount === 4;
     }
 
-    private function isOnlySanctumRemaining()
+    private function isOnlySanctumRemaining(String $boardId)
     {
-        $noSanctumTileCount = BaggedTile::whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)->count();
+        $noSanctumTileCount = BaggedTile::whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
+            ->where('board_id', $boardId)
+            ->count();
         $totalTileCount = BaggedTile::count();
 
         return ($totalTileCount === 1 && $noSanctumTileCount === 0);
     }
 
-    private function placementClosesMap(PathType $pathType, Coordinate $coordinate) {
+    private function placementClosesMap(PathType $pathType, Coordinate $coordinate, String $id) {
         $highestYCoordinate = PlacedSubtile::max('y_coordinate');
 
-        $subtileGraph = $this->getSubtileGraph();
+        $subtileGraph = $this->getSubtileGraph($id);
         $placementCandidates = $subtileGraph->findAvailablePlacementsWithBFS();
         $connectingSpots = $subtileGraph->findOpenConnectionPositionsToMapWithBFS($highestYCoordinate);
 
@@ -628,8 +655,8 @@ class TileController extends Controller
                 return false;
             }
 
-            $adjacentTileDirections = $this->retrieveAllConnectingDirections($placementCandidate);
-            $adjacentConnectionDirections = $this->retrieveAllAvailableDirections($placementCandidate);
+            $adjacentTileDirections = $this->retrieveAllConnectingDirections($placementCandidate, $id);
+            $adjacentConnectionDirections = $this->retrieveAllAvailableDirections($placementCandidate, $id);
 
             if (count($adjacentConnectionDirections) === 0) {
                 return true;
@@ -671,29 +698,32 @@ class TileController extends Controller
         return false;
     }
 
-    private function orientationClosesMap(PathType $pathType, Coordinate $coordinate, Rotation $rotation) {
-        $highestYCoordinate = PlacedSubtile::max('y_coordinate');
-        $subtileGraph = $this->getSubtileGraph($coordinate, $rotation);
+    private function orientationClosesMap(PathType $pathType, Coordinate $coordinate, Rotation $rotation, String $id) {
+        $highestYCoordinate = PlacedSubtile::whereIn('tile_id', PlacedTile::where('board_id', $id)->pluck('id'))
+            ->max('y_coordinate');
+        $subtileGraph = $this->getSubtileGraph($id, $coordinate, $rotation);
         $connectingSpots = $subtileGraph->findOpenConnectionPositionsToMapWithBFS($highestYCoordinate);
 
         return count($connectingSpots) === 0;
     }
 
-    private function getPlacementCandidatesForSanctum() {
+    private function getPlacementCandidatesForSanctum(String $id) {
         $currentYCoordinate = PlacedSubtile::max('y_coordinate'); //Start with highest and decrement if no suitable candidates.
         $placementCandidates = [];
 
-        while (empty($placementCandidates) && !$this->tileOutOfBounds(new Coordinate(0, $currentYCoordinate))) {
-            $currentRow = PlacedSubtile::where('y_coordinate', $currentYCoordinate)->select(
-                'rotation', 
-                'path_type', 
-                'x_coordinate', 
-                'y_coordinate'
-            )->get();
+        while (empty($placementCandidates) && !$this->tileOutOfBounds(new Coordinate(0, $currentYCoordinate), $id)) {
+            $currentRow = PlacedSubtile::where('y_coordinate', $currentYCoordinate)
+                ->whereIn('placed_tile_id', PlacedTile::where('board_id', $id)->pluck('id'))
+                ->select(
+                    'rotation', 
+                    'path_type', 
+                    'x_coordinate', 
+                    'y_coordinate'
+                )->get();
 
             foreach ($currentRow as $currentTile)
             {
-                $availableDirections = $this->retrieveAllAvailableDirections($currentTile->coordinate);
+                $availableDirections = $this->retrieveAllAvailableDirections($currentTile->coordinate, $id);
                 $tileDirections = Rotation::getAdjacencies($currentTile->rotation, $currentTile->path_type);
                 
                 //Unoccupied tiles that actually connect to the current tile.
@@ -708,8 +738,8 @@ class TileController extends Controller
                     //Need to make sure there is room for a 1x2 tile, regardless of orientation.
                     $tile1 = Rotation::getCoordinateRelativeToDirection($currentTile->coordinate, $candidateDirection);
                     $tile2 = Rotation::getCoordinateRelativeToDirection($tile1, $candidateDirection);
-                    if (!$this->spaceIsOccupied($tile1) && !$this->tileOutOfBounds($tile1)
-                        && !$this->spaceIsOccupied($tile2) && !$this->tileOutOfBounds($tile2))
+                    if (!$this->spaceIsOccupied($tile1, $id) && !$this->tileOutOfBounds($tile1, $id)
+                        && !$this->spaceIsOccupied($tile2, $id) && !$this->tileOutOfBounds($tile2, $id))
                     {
                         array_push($placementCandidates, $tile1);
                     }

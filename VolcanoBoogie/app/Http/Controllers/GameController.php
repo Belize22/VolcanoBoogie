@@ -30,7 +30,8 @@ class GameController extends Controller
         ])->where('id', $id)->first();
 
         if (!$game) {
-            abort(404);
+            $game = $this->createGame();
+            //abort(404);
         }
 
         return Inertia::render('play-game', [

@@ -146,7 +146,7 @@ export default function PlayGame() {
     }
 
     function getAvailableSpotsForSanctumPlacement() {
-        fetch('/api/get-sanctum-placement-candidates', {
+        fetch('/api/get-sanctum-placement-candidates/' + game.id, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
