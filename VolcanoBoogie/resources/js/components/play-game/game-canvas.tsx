@@ -76,7 +76,7 @@ export default function GameCanvas({
                 );
             }
             else if (gameState === GameState.PLACING_TILE || gameState === GameState.PLACING_SANCTUM) {
-                highlightPlacementCandidates(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor, availableSpots);
+                highlightPlacementCandidates(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor, availableSpots, gameState);
             }
             drawGrid(uiOverlayRef.current, TILE_SIZE, canvasCenter, zoomFactor);
         }
@@ -133,7 +133,7 @@ export default function GameCanvas({
                 clearCanvas(canvas);
                 if (gameState === GameState.PLACING_TILE || gameState === GameState.PLACING_SANCTUM) {
                     highlightCurrentTile(canvas, x, y, TILE_SIZE, canvasCenter, zoomFactor);
-                    highlightPlacementCandidates(canvas, TILE_SIZE, canvasCenter, zoomFactor, availableSpots);
+                    highlightPlacementCandidates(canvas, TILE_SIZE, canvasCenter, zoomFactor, availableSpots, gameState);
                 }
                 else if (gameState === GameState.ROTATING_TILE || gameState === GameState.ROTATING_SANCTUM) {
                     const tiles = board.placed_tiles.filter(

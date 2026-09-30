@@ -488,8 +488,6 @@ class TileController extends Controller
             ->pluck('id')
         )->get();
 
-        \Log::info($wingSubtiles);
-
         $minX = $wingSubtiles->min('x_coordinate');
         $maxX = $wingSubtiles->max('x_coordinate');
         $minY = $wingSubtiles->min('y_coordinate');
@@ -630,7 +628,7 @@ class TileController extends Controller
         $noSanctumTileCount = BaggedTile::whereNot('tile_id', Tile::where('tile_type', TileType::SANCTUM)->first()->id)
             ->where('board_id', $boardId)
             ->count();
-        $totalTileCount = BaggedTile::count();
+        $totalTileCount = BaggedTile::where('board_id', $boardId)->count();
 
         return ($totalTileCount === 1 && $noSanctumTileCount === 0);
     }

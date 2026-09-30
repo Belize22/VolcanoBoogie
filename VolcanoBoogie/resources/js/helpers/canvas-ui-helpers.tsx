@@ -1,3 +1,4 @@
+import { GameState } from '@/enums/game-state'
 import { Coordinate } from '@/interfaces/coordinate';
 import { PlacedTile } from '@/interfaces/placed-tile';
 import { retrieveTileCenter, retrieveTileSize } from '@/helpers/tile-helpers';
@@ -86,7 +87,8 @@ export function highlightPlacementCandidates(
     tileSize: number, 
     canvasCenter: Coordinate,
     zoomFactor: number,
-    availableSpots: Coordinate[]
+    availableSpots: Coordinate[],
+    gameState: GameState
 ) {
     const context = canvas.getContext("2d");
     if (context) {
@@ -109,7 +111,7 @@ export function highlightPlacementCandidates(
             );
 
             if (canvasCoordinates !== null) {
-                context.fillStyle = 'rgba(0, 255, 0, 0.5)';
+                context.fillStyle = gameState === GameState.PLACING_SANCTUM ? 'rgba(0, 200, 255, 0.5)' : 'rgba(0, 255, 0, 0.5)';
 
                 //Add by width offset to ensure highlighted square fits grid tile.
                 context.fillRect(
