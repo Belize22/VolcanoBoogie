@@ -57,7 +57,7 @@ class GameController extends Controller
         ], 200);
     }
 
-    private function createGame()
+    public function createGame(Request $request)
     {
         $game = Game::create([
             'status' => GameStatus::IN_PROGRESS,
@@ -182,6 +182,10 @@ class GameController extends Controller
             }
         }
 
-        return $game;
+        return response()->json([
+            'success' => true,
+            'message' => 'Game successfully created!',
+            'redirect_url' => '/play-game/' . $game->id,
+        ], 200);
     }
 }

@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { PageProps } from '@inertiajs/core';
 import { Head, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
@@ -14,6 +15,25 @@ export default function ViewGames() {
     const { games } = usePage<PlayGameProps>().props;
     const [currentGames, setCurrentGames] = useState<Game[]>(games);
     const [showCompletedGames, setShowCompletedGames] = useState<boolean>(false);
+
+    function createGame() {
+        fetch('/api/create-game', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                router.get(data.redirect_url);
+            }
+            if (data.error) {
+                console.log(data);
+            }
+        });
+    }
 
     function updateGameList() {
         const statusList = [GameStatus.IN_PROGRESS];
@@ -53,6 +73,7 @@ export default function ViewGames() {
             <div className="flex w-screen h-screen flex-1 flex-col gap-4 overflow-x-auto">
                 <div className="flex flex-col items-center justify-center bg-stone-900 border-l shadow-lg rounded-xl p-4 m-1">
                     <FilterPane
+                        createGame={createGame}
                         showCompletedGames={showCompletedGames}
                         setShowCompletedGames={setShowCompletedGames}
                     />

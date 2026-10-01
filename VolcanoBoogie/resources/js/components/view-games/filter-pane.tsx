@@ -2,11 +2,13 @@ import { Dispatch, SetStateAction } from 'react';
 import { Dices } from 'lucide-react';
 
 type Props = {
+    createGame: () => void
     showCompletedGames: boolean,
     setShowCompletedGames: Dispatch<SetStateAction<boolean>>
 }
 
 export default function FilterPane({
+    createGame,
     showCompletedGames,
     setShowCompletedGames
 }: Props) {
@@ -21,7 +23,10 @@ export default function FilterPane({
                 />
                 <span className="px-1">Show Completed Games</span>
             </label>
-            <button className="ml-auto flex items-center gap-2 p-2 bg-green-600 rounded-lg hover:scale-110">
+            <button 
+                className="ml-auto flex items-center gap-2 p-2 bg-green-600 rounded-lg hover:scale-110"
+                onClick={createGame}
+            >
                 <Dices/>
                 <p>New Game</p>
             </button>
