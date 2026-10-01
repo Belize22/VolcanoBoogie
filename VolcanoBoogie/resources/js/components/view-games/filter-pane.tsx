@@ -1,22 +1,22 @@
-import { useState } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { Dices } from 'lucide-react';
 
 type Props = {
-
+    showCompletedGames: boolean,
+    setShowCompletedGames: Dispatch<SetStateAction<boolean>>
 }
 
 export default function FilterPane({
-
+    showCompletedGames,
+    setShowCompletedGames
 }: Props) {
-    const [showCompletedGames, useShowCompletedGames] = useState<boolean>(false);
-
     return (
         <div className="flex bg-stone-500 border-l shadow-lg rounded-xl p-4 m-1 w-3/4">
             <label className="flex items-center">
                 <input
                     type="checkbox"
                     checked={showCompletedGames}
-                    onChange={() => useShowCompletedGames(!showCompletedGames)}
+                    onChange={() => setShowCompletedGames(!showCompletedGames)}
                     className="size-5 accent-yellow-200"
                 />
                 <span className="px-1">Show Completed Games</span>

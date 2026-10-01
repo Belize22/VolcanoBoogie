@@ -40,11 +40,21 @@ class GameController extends Controller
 
     public function viewGames()
     {
-        $games = Game::get();
+        $games = Game::where('status', 'in_progress')->get();
 
         return Inertia::render('view-games', [
             'games' => $games,
         ]);
+    }
+
+    public function getGames(Request $request) {
+        $games = Game::whereIn('status', $request->statusList)->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'List of games has been successfully retrieved!',
+            'games' => $games,
+        ], 200);
     }
 
     private function createGame()

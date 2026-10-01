@@ -2,8 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\TileController;
 
+Route::post('/get-games', [GameController::class, 'getGames'])->name('get-games');
 Route::post('/place-tile', [TileController::class, 'placeTile'])->name('place-tile');
 Route::post('/confirm-tile-rotation', [TileController::class, 'confirmTileRotation'])->name('confirm-tile-rotation');
 Route::post('/place-sanctum', [TileController::class, 'placeSanctum'])->name('place-sanctum');
