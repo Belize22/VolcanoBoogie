@@ -8,6 +8,7 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+Route::get('/play-game/', [GameController::class, 'viewGames'])->name('view-games');
 Route::get('/play-game/{id}', [GameController::class, 'playGame'])->name('play-game');
 
 Route::middleware(['auth', 'verified'])->group(function () {

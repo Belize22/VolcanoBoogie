@@ -38,6 +38,15 @@ class GameController extends Controller
         ]);
     }
 
+    public function viewGames()
+    {
+        $games = Game::get();
+
+        return Inertia::render('view-games', [
+            'games' => $games,
+        ]);
+    }
+
     private function createGame()
     {
         $game = Game::create([
