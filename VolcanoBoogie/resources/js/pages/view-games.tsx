@@ -9,13 +9,19 @@ interface PlayGameProps extends PageProps {
 }
 
 export default function ViewGames() {
+    const { games } = usePage<PlayGameProps>().props;
+
+    console.log(games);
+
     return (
         <>
             <Head title="View Games" />
             <div className="flex w-screen h-screen flex-1 flex-col gap-4 overflow-x-auto">
                 <div className="flex flex-col items-center justify-center bg-stone-900 border-l shadow-lg rounded-xl p-4 m-1">
                     <FilterPane/>
-                    <GamePane/>
+                    <GamePane
+                        games={games}
+                    />
                 </div>
             </div>
         </>
