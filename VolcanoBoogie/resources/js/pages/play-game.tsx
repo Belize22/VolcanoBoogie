@@ -12,6 +12,7 @@ import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/ro
 import Sidebar from '@/components/play-game/sidebar';
 import Footer from '@/components/play-game/footer';
 import GameCanvas from '@/components/play-game/game-canvas';
+import NotificationPopup from '@/components/notification-popup';
 
 interface PlayGameProps extends PageProps {
     game: Game,
@@ -30,10 +31,20 @@ export default function PlayGame() {
             CanvasInteractionState.GAME_INTERACTION
         );
 
+    const [notificationStatus, setNotificationStatus] = useState<string>("");
+    const [notificationMessage, setNotificationMessage] = useState<string>("");
+    const [isNotificationVisible, setIsNotificationVisible] = useState<boolean>(false);
+
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
     const [availableSpots, setAvailableSpots] = useState<Coordinate[]>([]);
+
+    function triggerErrorMessage(message: string) {
+        setNotificationStatus('error');
+        setNotificationMessage(message);
+        setIsNotificationVisible(true);
+    }
 
     function placeTile(coordinate: Coordinate) {
         fetch('/api/place-tile', {
@@ -51,6 +62,7 @@ export default function PlayGame() {
             }
             else if (data.error) {
                 console.log(data);
+                triggerErrorMessage(data.message);
             }
         });
     }
@@ -76,6 +88,7 @@ export default function PlayGame() {
             }
             else if (data.error) {
                 console.log(data);
+                triggerErrorMessage(data.message);
             }
         });
     }
@@ -96,6 +109,7 @@ export default function PlayGame() {
             }
             else if (data.error) {
                 console.log(data);
+                triggerErrorMessage(data.message);
             }
         });
     }
@@ -121,6 +135,7 @@ export default function PlayGame() {
             }
             else if (data.error) {
                 console.log(data);
+                triggerErrorMessage(data.message);
             }
         });
     }
@@ -141,6 +156,7 @@ export default function PlayGame() {
             }
             else if (data.error) {
                 console.log(data);
+                triggerErrorMessage(data.message);
             }
         });
     }
@@ -160,6 +176,7 @@ export default function PlayGame() {
             }
             else if (data.error) {
                 console.log(data);
+                triggerErrorMessage(data.message);
             }
         });
     }
@@ -285,6 +302,12 @@ export default function PlayGame() {
                     rotateTile={rotateTile}
                     rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
+                />
+                <NotificationPopup
+                    status={notificationStatus}
+                    message={notificationMessage}
+                    isVisible={isNotificationVisible}
+                    setIsVisible={setIsNotificationVisible}
                 />
             </div>
         </>
