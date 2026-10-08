@@ -254,6 +254,7 @@ class TileController extends Controller
         }
         else {
             $game->game_state = GameState::GAME_COMPLETE;
+            $game->status = GameStatus::COMPLETE;
         }
         $game->save();
 
@@ -341,6 +342,7 @@ class TileController extends Controller
 
                 $game = Game::where('id', $request->boardId)->first();
                 $game->game_state = GameState::GAME_COMPLETE;
+                $game->status = GameStatus::COMPLETE;
                 $game->save();
             }
         }

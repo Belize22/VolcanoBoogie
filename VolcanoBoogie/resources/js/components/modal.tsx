@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 
 type Props = {

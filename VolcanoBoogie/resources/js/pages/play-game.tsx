@@ -1,11 +1,11 @@
-import { router } from '@inertiajs/react';
 import { PageProps } from '@inertiajs/core';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { Game } from '@/interfaces/game';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { GameState } from '@/enums/game-state';
+import { GameStatus } from '@/enums/game-status';
 import { PathType } from '@/enums/path-type';
 import { PlacementStatus } from '@/enums/placement-status';
 import { getCoordinateRelativeToDirection } from '@/helpers/coordinate-helpers';
@@ -38,7 +38,7 @@ export default function PlayGame() {
     const [notificationMessage, setNotificationMessage] = useState<string>("");
     const [isNotificationVisible, setIsNotificationVisible] = useState<boolean>(false);
 
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -275,6 +275,12 @@ export default function PlayGame() {
         }
         console.log(currentGame);
     }, [currentGame.board]);
+
+    useEffect(() => {
+        if (currentGame.status === GameStatus.COMPLETE) {
+            setIsModalOpen(true);
+        }
+    }, [currentGame.status])
     
     return (
         <>
@@ -307,6 +313,8 @@ export default function PlayGame() {
                     rotateTile={rotateTile}
                     rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
+                    gameStatus={currentGame.status}
+                    setIsModalOpen={setIsModalOpen}
                 />
                 <NotificationPopup
                     status={notificationStatus}
