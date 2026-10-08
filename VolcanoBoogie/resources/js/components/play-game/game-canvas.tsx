@@ -22,6 +22,9 @@ type Props = {
     setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
     zoomFactor: number;
     setZoomFactor: Dispatch<SetStateAction<number>>;
+    minZoomFactor: number;
+    maxZoomFactor: number;
+    scrollSensitivity: number;
     canvasInteractionState: CanvasInteractionState;
     placeTile: (coordinate: Coordinate) => void;
     placeSanctum: (coordinate: Coordinate) => void;
@@ -36,6 +39,9 @@ export default function GameCanvas({
     setCanvasCenter,
     zoomFactor,
     setZoomFactor,
+    minZoomFactor,
+    maxZoomFactor,
+    scrollSensitivity,
     canvasInteractionState,
     placeTile,
     placeSanctum,
@@ -43,9 +49,6 @@ export default function GameCanvas({
     gameState
 }: Props) {
     const TILE_SIZE = 100;
-    const MIN_ZOOM_FACTOR = 0.5;
-    const MAX_ZOOM_FACTOR = 5;
-    const SCROLL_SENSITIVITY = 0.2;
 
     const [isMovingCanvas, setIsMovingCanvas] = useState<boolean>(false);
 
@@ -164,10 +167,10 @@ export default function GameCanvas({
 
     function handleMouseScroll(event: WheelEvent) {
         if (uiOverlayRef.current != null) {
-            let updatedZoomFactor = zoomFactor - Math.sign(event.deltaY) * SCROLL_SENSITIVITY
+            let updatedZoomFactor = zoomFactor - Math.sign(event.deltaY) * scrollSensitivity;
 
             //Clamp between MIN_ZOOM_FACTOR and MAX_ZOOM_FACTOR
-            updatedZoomFactor = Math.max(MIN_ZOOM_FACTOR, Math.min(MAX_ZOOM_FACTOR, updatedZoomFactor));
+            updatedZoomFactor = Math.max(minZoomFactor, Math.min(maxZoomFactor, updatedZoomFactor));
             updatedZoomFactor = Math.round(updatedZoomFactor * 10) / 10; //1 decimal place.
 
             setZoomFactor(updatedZoomFactor);

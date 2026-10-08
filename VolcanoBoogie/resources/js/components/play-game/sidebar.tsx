@@ -7,6 +7,7 @@ import { GameStatus } from '@/enums/game-status';
 import { FileChartColumn, SquareMenu } from 'lucide-react';
 import ControlPane from '@/components/play-game/control-pane';
 import RotationPane from '@/components/play-game/rotation-pane';
+import InformationPane from '@/components/play-game/information-pane';
 
 type Props = {
     setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
@@ -14,6 +15,9 @@ type Props = {
     zoomFactor: number;
     setZoomFactor: Dispatch<SetStateAction<number>>;
     defaultZoomFactor: number;
+    minZoomFactor: number;
+    maxZoomFactor: number;
+    scrollSensitivity: number;
     canvasInteractionState: CanvasInteractionState;
     setCanvasInteractionState: Dispatch<SetStateAction<CanvasInteractionState>>;
     confirmTileRotation: () => void;
@@ -31,6 +35,9 @@ export default function Sidebar({
     zoomFactor,
     setZoomFactor,
     defaultZoomFactor,
+    minZoomFactor,
+    maxZoomFactor,
+    scrollSensitivity,
     canvasInteractionState,
     setCanvasInteractionState,
     confirmTileRotation,
@@ -43,12 +50,18 @@ export default function Sidebar({
 }: Props) {
     return (
         <div className="flex flex-col h-screen fixed inset-y-0 right-0 w-2/10 bg-stone-900 border-l shadow-lg">
-            Current Zoom Factor: {zoomFactor}
+            <InformationPane
+                zoomFactor={zoomFactor}
+            />
             <ControlPane
                 setCanvasCenter={setCanvasCenter}
                 defaultCanvasCenter={defaultCanvasCenter}
+                zoomFactor={zoomFactor}
                 setZoomFactor={setZoomFactor}
                 defaultZoomFactor={defaultZoomFactor}
+                minZoomFactor={minZoomFactor}
+                maxZoomFactor={maxZoomFactor}
+                scrollSensitivity={scrollSensitivity}
                 canvasInteractionState={canvasInteractionState}
                 setCanvasInteractionState={setCanvasInteractionState}
             />

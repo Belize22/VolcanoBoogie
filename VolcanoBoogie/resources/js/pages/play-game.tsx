@@ -27,6 +27,10 @@ export default function PlayGame() {
     const DEFAULT_CANVAS_CENTER: Coordinate = {x: 0, y: 0};
     const DEFAULT_ZOOM_FACTOR: number = 1;
 
+    const MIN_ZOOM_FACTOR = 0.5;
+    const MAX_ZOOM_FACTOR = 5;
+    const SCROLL_SENSITIVITY = 0.1;
+
     const [canvasCenter, setCanvasCenter] = useState<Coordinate>(DEFAULT_CANVAS_CENTER)
     const [zoomFactor, setZoomFactor] = useState<number>(DEFAULT_ZOOM_FACTOR);
     const [canvasInteractionState, setCanvasInteractionState] = 
@@ -293,6 +297,9 @@ export default function PlayGame() {
                     setCanvasCenter={setCanvasCenter}
                     zoomFactor={zoomFactor}
                     setZoomFactor={setZoomFactor}
+                    minZoomFactor={MIN_ZOOM_FACTOR}
+                    maxZoomFactor={MAX_ZOOM_FACTOR}
+                    scrollSensitivity={SCROLL_SENSITIVITY}
                     canvasInteractionState={canvasInteractionState}
                     placeTile={placeTile}
                     placeSanctum={placeSanctum}
@@ -306,6 +313,9 @@ export default function PlayGame() {
                     zoomFactor={zoomFactor}
                     setZoomFactor={setZoomFactor}
                     defaultZoomFactor={DEFAULT_ZOOM_FACTOR}
+                    minZoomFactor={MIN_ZOOM_FACTOR}
+                    maxZoomFactor={MAX_ZOOM_FACTOR}
+                    scrollSensitivity={SCROLL_SENSITIVITY}
                     canvasInteractionState={canvasInteractionState}
                     setCanvasInteractionState={setCanvasInteractionState}
                     confirmTileRotation={confirmTileRotation}
