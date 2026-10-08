@@ -51,6 +51,7 @@ export default function Sidebar({
     return (
         <div className="flex flex-col h-screen fixed inset-y-0 right-0 w-2/10 bg-stone-900 border-l shadow-lg">
             <InformationPane
+                gameState={gameState}
                 zoomFactor={zoomFactor}
             />
             <ControlPane
