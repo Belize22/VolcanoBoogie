@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import { PageProps } from '@inertiajs/core';
 import { Head, usePage } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
@@ -9,9 +10,11 @@ import { PathType } from '@/enums/path-type';
 import { PlacementStatus } from '@/enums/placement-status';
 import { getCoordinateRelativeToDirection } from '@/helpers/coordinate-helpers';
 import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/rotation-helpers';
+import { Map, SquareMenu } from 'lucide-react';
 import Sidebar from '@/components/play-game/sidebar';
 import Footer from '@/components/play-game/footer';
 import GameCanvas from '@/components/play-game/game-canvas';
+import Modal from '@/components/modal';
 import NotificationPopup from '@/components/notification-popup';
 
 interface PlayGameProps extends PageProps {
@@ -34,6 +37,8 @@ export default function PlayGame() {
     const [notificationStatus, setNotificationStatus] = useState<string>("");
     const [notificationMessage, setNotificationMessage] = useState<string>("");
     const [isNotificationVisible, setIsNotificationVisible] = useState<boolean>(false);
+
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
 
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -310,6 +315,30 @@ export default function PlayGame() {
                     setIsVisible={setIsNotificationVisible}
                 />
             </div>
+            <Modal
+                title={"Game Over"}
+                description={"The map has been built!"}
+                isOpen={isModalOpen}
+                setIsOpen={setIsModalOpen}
+            >
+                <p>The map has been properly developed and the sanctum has been placed!</p>
+                <div className="flex justify-center py-2">
+                    <button 
+                        className="flex items-center gap-2 p-2 bg-stone-400 rounded-lg hover:scale-110 mx-2"
+                        onClick={() => setIsModalOpen(false)}
+                    >
+                        <Map className="text-stone-800"/>
+                        <p className="text-stone-800">View Map</p>
+                    </button>
+                    <button 
+                        className="flex items-center gap-2 p-2 bg-stone-400 rounded-lg hover:scale-110 mx-2"
+                        onClick={() => {router.get('/play-game');}}
+                    >
+                        <SquareMenu className="text-stone-800"/>
+                        <p className="text-stone-800">Back to Game Menu</p>
+                    </button>
+                </div>
+            </Modal>
         </>
     );
 }
