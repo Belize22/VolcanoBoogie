@@ -23,7 +23,7 @@ export default function Modal({
 
             {/* Modal */}
             <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-                <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-stone-800 p-6 text-left align-middle shadow-xl transition-all">
+                <DialogPanel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-stone-800 p-6 text-left align-middle shadow-xl transition-all">
                     <DialogTitle className="text-2xl text-center font-bold text-stone-100">{title}</DialogTitle>
                     <Description className="text-lg text-center text-stone-100">{description}</Description>
                     <hr className="border-t border-stone-100 my-3" />
