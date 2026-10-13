@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Game } from '@/interfaces/game';
 import { GameStatus } from '@/enums/game-status';
 import { X, Play } from 'lucide-react';
+import { Difficulty } from '@/enums/difficulty';
 import CreateGame from '@/components/view-games/create-game';
 import FilterPane from '@/components/view-games/filter-pane';
 import GamePane from '@/components/view-games/game-pane';
@@ -18,6 +19,9 @@ export default function ViewGames() {
     const { games } = usePage<PlayGameProps>().props;
     const [currentGames, setCurrentGames] = useState<Game[]>(games);
     const [showCompletedGames, setShowCompletedGames] = useState<boolean>(false);
+    
+    const [selectedNumExplorers, setSelectedNumExplorers] = useState<number>(4);
+    const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.INTERMEDIATE);
 
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -92,7 +96,12 @@ export default function ViewGames() {
                 isOpen={isModalOpen}
                 setIsOpen={setIsModalOpen}
             >
-                <CreateGame/>
+                <CreateGame
+                    selectedNumExplorers={selectedNumExplorers}
+                    setSelectedNumExplorers={setSelectedNumExplorers}
+                    selectedDifficulty={selectedDifficulty}
+                    setSelectedDifficulty={setSelectedDifficulty}
+                />
                 <div className="flex justify-center py-2">
                     <button 
                         className="flex items-center gap-2 p-2 bg-red-500 rounded-lg hover:scale-110 mx-2"
