@@ -2,7 +2,6 @@ import { Dispatch, SetStateAction } from 'react';
 import { Difficulty } from '@/enums/difficulty';
 import { DifficultyOptions } from '@/interfaces/difficulty-options';
 import { NumExplorerOptions } from '@/interfaces/num-explorer-options';
-import ExplorerSelectionPane from '@/components/view-games/explorer-selection-pane';
 
 type Props = {
     selectedNumExplorers: number;
@@ -77,7 +76,6 @@ export default function CreateGame({
                     </div>
                 </div>
             </div>
-            <ExplorerSelectionPane/>
         </>
     );
 }
