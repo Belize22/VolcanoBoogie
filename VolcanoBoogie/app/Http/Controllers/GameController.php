@@ -47,6 +47,11 @@ class GameController extends Controller
         ]);
     }
 
+    public function startGame()
+    {
+        return Inertia::render('start-game');
+    }
+
     public function getGames(Request $request) {
         $games = Game::whereIn('status', $request->statusList)->get();
 

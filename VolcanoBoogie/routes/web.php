@@ -10,6 +10,7 @@ Route::inertia('/', 'welcome', [
 
 Route::get('/play-game/', [GameController::class, 'viewGames'])->name('view-games');
 Route::get('/play-game/{id}', [GameController::class, 'playGame'])->name('play-game');
+Route::get('/start-game/', [GameController::class, 'startGame'])->name('start-game');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
