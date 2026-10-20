@@ -1,8 +1,10 @@
 import { useState, Dispatch, SetStateAction } from 'react';
 import { Head, router } from '@inertiajs/react';
 import { Difficulty } from '@/enums/difficulty';
+import { ExplorerRole } from '@/enums/explorer-role';
 import { DifficultyOptions } from '@/interfaces/difficulty-options';
 import { NumExplorerOptions } from '@/interfaces/num-explorer-options';
+import ExplorerSelectionPane from '@/components/start-game/explorer-selection-pane';
 
 export default function StartGame() {
     const UNSELECTED_NUM_EXPLORERS_STYLE = "bg-stone-500 p-2 px-3 m-1 rounded-lg hover:scale-110";
@@ -10,6 +12,9 @@ export default function StartGame() {
         
     const [selectedNumExplorers, setSelectedNumExplorers] = useState<number>(4);
     const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.INTERMEDIATE);
+    const [selectedExplorerRoles, setSelectedExplorerRoles] = useState<(ExplorerRole | undefined)[]>(
+        new Array(6).fill(undefined)
+    );
 
     const numExplorerOptions: NumExplorerOptions[] = [
         {id: 1, numExplorers: 3},
@@ -90,6 +95,11 @@ export default function StartGame() {
                             </div>
                         </div>
                     </div>
+                    <ExplorerSelectionPane
+                        selectedNumExplorers={selectedNumExplorers}
+                        selectedExplorerRoles={selectedExplorerRoles}
+                        setSelectedExplorerRoles={setSelectedExplorerRoles}
+                    />
                 </div>
             </div>
         </>
