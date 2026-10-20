@@ -13,7 +13,7 @@ export default function StartGame() {
     const [selectedNumExplorers, setSelectedNumExplorers] = useState<number>(4);
     const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.INTERMEDIATE);
     const [selectedExplorerRoles, setSelectedExplorerRoles] = useState<(ExplorerRole | undefined)[]>(
-        new Array(6).fill(undefined)
+        new Array(selectedNumExplorers).fill(undefined)
     );
 
     const numExplorerOptions: NumExplorerOptions[] = [
@@ -29,6 +29,23 @@ export default function StartGame() {
         {id: 3, difficulty: Difficulty.ADVANCED, unselectedStyle: "bg-red-900 p-2 m-1 rounded-lg hover:scale-110", selectedStyle: "bg-red-500 p-2 m-1 rounded-lg"},
         {id: 4, difficulty: Difficulty.EXPERT, unselectedStyle: "bg-purple-900 p-2 m-1 rounded-lg hover:scale-110", selectedStyle: "bg-purple-500 p-2 m-1 rounded-lg"},
     ]
+
+    function changeNumExplorers(selectedNumExplorers: number) {
+        setSelectedNumExplorers(selectedNumExplorers);
+
+        if (selectedNumExplorers < selectedExplorerRoles.length) {
+            setSelectedExplorerRoles(selectedExplorerRoles.slice(0, selectedNumExplorers));
+        }
+        else if (selectedNumExplorers > selectedExplorerRoles.length) {
+            const additionalExplorerRoles: (ExplorerRole | undefined)[] = new Array(
+                selectedNumExplorers - selectedExplorerRoles.length
+            ).fill(undefined);
+            
+            setSelectedExplorerRoles(
+                previousSelectedExplorerRoles => previousSelectedExplorerRoles.concat(additionalExplorerRoles)
+            );
+        }
+    }
 
     function prettyPrintDifficulty(difficulty: Difficulty) {
         //Capitalize first letter.
@@ -66,7 +83,7 @@ export default function StartGame() {
                                 {numExplorerOptions.map((numExplorerOption) => (
                                     <button 
                                         className={numExplorerOption.numExplorers === selectedNumExplorers ? SELECTED_NUM_EXPLORERS_STYLE : UNSELECTED_NUM_EXPLORERS_STYLE}
-                                        onClick={() => {setSelectedNumExplorers(numExplorerOption.numExplorers)}}
+                                        onClick={() => {changeNumExplorers(numExplorerOption.numExplorers)}}
                                     >
                                         <p 
                                             className={numExplorerOption.numExplorers === selectedNumExplorers ? "text-stone-900" : "text-stone-100"}
