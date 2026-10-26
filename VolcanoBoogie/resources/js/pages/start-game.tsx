@@ -46,11 +46,6 @@ export default function StartGame() {
             );
         }
     }
-
-    function prettyPrintDifficulty(difficulty: Difficulty) {
-        //Capitalize first letter.
-        return difficulty.charAt(0).toUpperCase() + difficulty.slice(1)
-    }
     
     function createGame() {
         fetch('/api/create-game', {
@@ -105,7 +100,7 @@ export default function StartGame() {
                                         <p 
                                             className={difficultyOption.difficulty === selectedDifficulty ? "text-stone-900" : "text-stone-100"}
                                         >
-                                            {prettyPrintDifficulty(difficultyOption.difficulty)}
+                                            {difficultyOption.difficulty.charAt(0).toUpperCase() + difficultyOption.difficulty.slice(1)}
                                         </p>
                                     </button>
                                 ))}

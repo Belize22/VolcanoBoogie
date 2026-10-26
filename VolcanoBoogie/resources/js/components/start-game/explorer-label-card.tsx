@@ -82,6 +82,6 @@ export default function ExplorerOptionsPane({
     }
 
     return (
-        <div className={retrieveLabelCardClassName()}>{retrieveIcon()}{explorerRole.toUpperCase()}</div>
+        <div className={retrieveLabelCardClassName()}>{retrieveIcon()}{explorerRole.charAt(0).toUpperCase() + explorerRole.slice(1)}</div>
     )
 }

@@ -24,14 +24,14 @@ export default function ExplorerSelectionPane({
     }
 
     return (
-        <div className="bg-stone-700 text-center p-2 m-2 rounded-xl w-2/4">
+        <div className="bg-stone-700 text-center p-2 m-2 rounded-xl">
             <p className="text-xl">Select Explorers</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 p-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 p-1">
             {selectedExplorerRoles.slice(0, selectedNumExplorers).map((selectedExplorerRole, index) => (
                 <div className="flex items-center justify-center bg-stone-500 p-2 rounded-lg">
                     <p className="pr-3">Player {index + 1}: </p>
                     <button
-                        className="hover:scale-105 w-4/6"
+                        className="hover:scale-105 w-full"
                         onClick={() => {openExplorerOptionsPane(index)}}
                     >
                         {selectedExplorerRole === undefined ? 
