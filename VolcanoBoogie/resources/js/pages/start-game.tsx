@@ -76,7 +76,11 @@ export default function StartGame() {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-            }
+            },
+            body: JSON.stringify({
+                selectedExplorerRoles: selectedExplorerRoles, 
+                selectedDifficulty: selectedDifficulty
+            })
         })
         .then((response) => response.json())
         .then((data) => {

@@ -10,11 +10,16 @@ use App\Models\Board;
 use App\Models\BaggedTile;
 use App\Models\PlacedTile;
 use App\Models\PlacedSubtile;
+use App\Models\Player;
 use App\Models\Tile;
+use App\Models\TurnPreset;
+use App\Enums\Difficulty;
+use App\Enums\ExplorerRole;
 use App\Enums\GameState;
 use App\Enums\GameStatus;
 use App\Enums\PathType;
 use App\Enums\PlacementStatus;
+use App\Enums\PlayerStatus;
 use App\Enums\Property;
 use App\Enums\Rotation;
 use App\Enums\TileType;
@@ -64,6 +69,26 @@ class GameController extends Controller
 
     public function createGame(Request $request)
     {
+        if (count($request['selectedExplorerRoles']) < 3 || count($request['selectedExplorerRoles']) > 6)
+        {
+            return response()->json([
+                'error' => 'Improper settings applied!',
+                'message' => 'Explorer count must be between 3-6 explorers!',
+            ], 409);
+        }
+
+        if (in_array(NULL, $request['selectedExplorerRoles'], true))
+        {
+            return response()->json([
+                'error' => 'Improper settings applied!',
+                'message' => 'Not all explorers have an explorer role assigned!',
+            ], 409);
+        }
+
+        $startingTurns = TurnPreset::where('players', count($request['selectedExplorerRoles']))
+            ->where('difficulty', Difficulty::from($request['selectedDifficulty']))
+            ->pluck('turns')->first();
+
         $game = Game::create([
             'status' => GameStatus::IN_PROGRESS,
             'state' => GameState::PLACING_TILE,
@@ -71,7 +96,19 @@ class GameController extends Controller
 
         $board = Board::create([
             'game_id' => $game->id,
+            'turns' => $startingTurns
         ]);
+
+        foreach ($request['selectedExplorerRoles'] as $selectedExplorer) {
+            Player::create([
+                'game_id' => $game->id,
+                'explorer_role' => ExplorerRole::from($selectedExplorer),
+                'current_health' => 5,
+                'max_health' => 5,
+                'item' => NULL,
+                'player_status' => PlayerStatus::ACTIVE,
+            ]);
+        }
 
         $bag = Bag::create([
             'game_id' => $game->id,
