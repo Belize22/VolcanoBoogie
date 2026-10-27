@@ -1,5 +1,6 @@
 import { useState, Dispatch, SetStateAction } from 'react';
 import { Head, router } from '@inertiajs/react';
+import { Play, X } from 'lucide-react';
 import { Difficulty } from '@/enums/difficulty';
 import { ExplorerRole } from '@/enums/explorer-role';
 import { DifficultyOptions } from '@/interfaces/difficulty-options';
@@ -9,6 +10,8 @@ import ExplorerSelectionPane from '@/components/start-game/explorer-selection-pa
 export default function StartGame() {
     const UNSELECTED_NUM_EXPLORERS_STYLE = "bg-stone-500 p-2 px-3 m-1 rounded-lg hover:scale-110";
     const SELECTED_NUM_EXPLORERS_STYLE = "bg-stone-300 p-2 px-3 m-1 rounded-lg hover:scale-110";
+    const DISABLED_START_GAME_STYLE = "ml-auto flex items-center gap-2 p-2 bg-green-600 rounded-lg opacity-50";
+    const ENABLED_START_GAME_STYLE = "ml-auto flex items-center gap-2 p-2 bg-green-600 rounded-lg hover:scale-110";
         
     const [selectedNumExplorers, setSelectedNumExplorers] = useState<number>(4);
     const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.INTERMEDIATE);
@@ -24,10 +27,30 @@ export default function StartGame() {
     ]
 
     const difficultyOptions: DifficultyOptions[] = [
-        {id: 1, difficulty: Difficulty.BEGINNER, unselectedStyle: "bg-green-900 p-2 m-1 rounded-lg hover:scale-110", selectedStyle: "bg-green-500 p-2 m-1 rounded-lg"},
-        {id: 2, difficulty: Difficulty.INTERMEDIATE, unselectedStyle: "bg-yellow-900 p-2 m-1 rounded-lg hover:scale-110", selectedStyle: "bg-yellow-500 p-2 m-1 rounded-lg"},
-        {id: 3, difficulty: Difficulty.ADVANCED, unselectedStyle: "bg-red-900 p-2 m-1 rounded-lg hover:scale-110", selectedStyle: "bg-red-500 p-2 m-1 rounded-lg"},
-        {id: 4, difficulty: Difficulty.EXPERT, unselectedStyle: "bg-purple-900 p-2 m-1 rounded-lg hover:scale-110", selectedStyle: "bg-purple-500 p-2 m-1 rounded-lg"},
+        {
+            id: 1, 
+            difficulty: Difficulty.BEGINNER, 
+            unselectedStyle: "bg-green-900 p-2 m-1 rounded-lg hover:scale-110", 
+            selectedStyle: "bg-green-500 p-2 m-1 rounded-lg"
+        },
+        {
+            id: 2, 
+            difficulty: Difficulty.INTERMEDIATE, 
+            unselectedStyle: "bg-yellow-900 p-2 m-1 rounded-lg hover:scale-110", 
+            selectedStyle: "bg-yellow-500 p-2 m-1 rounded-lg"
+        },
+        {
+            id: 3, 
+            difficulty: Difficulty.ADVANCED, 
+            unselectedStyle: "bg-red-900 p-2 m-1 rounded-lg hover:scale-110", 
+            selectedStyle: "bg-red-500 p-2 m-1 rounded-lg"
+        },
+        {
+            id: 4, 
+            difficulty: Difficulty.EXPERT, 
+            unselectedStyle: "bg-purple-900 p-2 m-1 rounded-lg hover:scale-110", 
+            selectedStyle: "bg-purple-500 p-2 m-1 rounded-lg"
+        },
     ]
 
     function changeNumExplorers(selectedNumExplorers: number) {
@@ -71,8 +94,8 @@ export default function StartGame() {
             <Head title="Start Game" />
             <div className="flex w-screen h-screen flex-1 flex-col gap-4 overflow-x-auto">
                 <div className="flex flex-col items-center justify-center bg-stone-900 border-l shadow-lg rounded-xl p-4 m-1">
-                    <div className="flex justify-center">
-                        <div className="bg-stone-700 text-center p-2 mx-2 rounded-xl">
+                    <div className="bg-stone-700 rounded-xl">
+                        <div className="text-center p-2 mx-2">
                             <p className="text-xl">Select Number of Explorers</p>
                             <div className="flex justify-center rounded-xl py-2">
                                 {numExplorerOptions.map((numExplorerOption) => (
@@ -89,6 +112,7 @@ export default function StartGame() {
                                 ))}
                             </div>
                         </div>
+                        <hr className="border-t border-stone-100 mx-3" />
                         <div className="bg-stone-700 text-center p-2 mx-2 rounded-xl">
                             <p className="text-xl">Select Difficulty</p>
                             <div className="flex justify-center rounded-xl py-2">
@@ -106,12 +130,30 @@ export default function StartGame() {
                                 ))}
                             </div>
                         </div>
+                        <hr className="border-t border-stone-100 mx-3" />
+                        <ExplorerSelectionPane
+                            selectedNumExplorers={selectedNumExplorers}
+                            selectedExplorerRoles={selectedExplorerRoles}
+                            setSelectedExplorerRoles={setSelectedExplorerRoles}
+                        />
+                        <hr className="border-t border-stone-100 mx-3" />
+                        <div className="flex items-center bg-stone-700 p-2 m-2 rounded-xl">
+                            <button
+                                className="flex items-center gap-2 p-2 m-2 bg-red-500 rounded-lg hover:scale-110"
+                                onClick={() => {router.get('/play-game')}}
+                            >
+                                <X/>
+                                <p>Cancel</p>
+                            </button>
+                            <button
+                                className={selectedExplorerRoles.includes(undefined) ? DISABLED_START_GAME_STYLE : ENABLED_START_GAME_STYLE}
+                                onClick={selectedExplorerRoles.includes(undefined) ? undefined : createGame}
+                            >
+                                <Play/>
+                                <p>Start Game</p>
+                            </button>
+                        </div>
                     </div>
-                    <ExplorerSelectionPane
-                        selectedNumExplorers={selectedNumExplorers}
-                        selectedExplorerRoles={selectedExplorerRoles}
-                        setSelectedExplorerRoles={setSelectedExplorerRoles}
-                    />
                 </div>
             </div>
         </>
