@@ -14,7 +14,7 @@ export default function StartGame() {
     const ENABLED_START_GAME_STYLE = "ml-auto flex items-center gap-2 p-2 bg-green-600 rounded-lg hover:scale-110";
         
     const [selectedNumExplorers, setSelectedNumExplorers] = useState<number>(4);
-    const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.INTERMEDIATE);
+    const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.NORMAL);
     const [selectedExplorerRoles, setSelectedExplorerRoles] = useState<(ExplorerRole | undefined)[]>(
         new Array(selectedNumExplorers).fill(undefined)
     );
@@ -35,7 +35,7 @@ export default function StartGame() {
         },
         {
             id: 2, 
-            difficulty: Difficulty.INTERMEDIATE, 
+            difficulty: Difficulty.NORMAL, 
             unselectedStyle: "bg-yellow-900 p-2 m-1 rounded-lg hover:scale-110", 
             selectedStyle: "bg-yellow-500 p-2 m-1 rounded-lg"
         },
