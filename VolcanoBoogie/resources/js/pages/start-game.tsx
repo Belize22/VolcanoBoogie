@@ -1,13 +1,21 @@
-import { useState, Dispatch, SetStateAction } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { PageProps } from '@inertiajs/core';
+import { useState } from 'react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { Play, X } from 'lucide-react';
 import { Difficulty } from '@/enums/difficulty';
 import { ExplorerRole } from '@/enums/explorer-role';
 import { DifficultyOptions } from '@/interfaces/difficulty-options';
 import { NumExplorerOptions } from '@/interfaces/num-explorer-options';
+import { TurnPreset } from '@/interfaces/turn-preset';
 import ExplorerSelectionPane from '@/components/start-game/explorer-selection-pane';
 
+interface StartGameProps extends PageProps {
+    turnPresets: TurnPreset[],
+}
+
 export default function StartGame() {
+    const { turnPresets } = usePage<StartGameProps>().props;
+
     const UNSELECTED_NUM_EXPLORERS_STYLE = "bg-stone-500 p-2 px-3 m-1 rounded-lg hover:scale-110";
     const SELECTED_NUM_EXPLORERS_STYLE = "bg-stone-300 p-2 px-3 m-1 rounded-lg hover:scale-110";
     const DISABLED_START_GAME_STYLE = "ml-auto flex items-center gap-2 p-2 bg-green-600 rounded-lg opacity-50";
@@ -52,6 +60,14 @@ export default function StartGame() {
             selectedStyle: "bg-purple-500 p-2 m-1 rounded-lg"
         },
     ]
+
+    function retrieveFinalTurnCount() {
+        return turnPresets.filter(
+            turnPreset => turnPreset.players === selectedNumExplorers
+        ).filter(
+            turnPreset => turnPreset.difficulty === selectedDifficulty
+        )[0].turns;
+    }
 
     function changeNumExplorers(selectedNumExplorers: number) {
         setSelectedNumExplorers(selectedNumExplorers);
@@ -133,6 +149,11 @@ export default function StartGame() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+                        <hr className="border-t border-stone-100 mx-3" />
+                        <div className="flex flex-col items-center justify-center bg-stone-700 p-2 m-2 rounded-xl">
+                            <p className="text-xl">Turns given for Game: </p>
+                            <div className="bg-red-800 p-2 rounded-2xl text-2xl">{retrieveFinalTurnCount()}</div>
                         </div>
                         <hr className="border-t border-stone-100 mx-3" />
                         <ExplorerSelectionPane

@@ -54,7 +54,11 @@ class GameController extends Controller
 
     public function startGame()
     {
-        return Inertia::render('start-game');
+        $turnPresets = TurnPreset::all();
+
+        return Inertia::render('start-game', [
+            'turnPresets' => $turnPresets
+        ]);
     }
 
     public function getGames(Request $request) {
