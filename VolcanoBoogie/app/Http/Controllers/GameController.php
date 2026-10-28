@@ -38,8 +38,11 @@ class GameController extends Controller
             abort(404);
         }
 
+        $players = Player::where('game_id', $game->id)->get();
+
         return Inertia::render('play-game', [
             'game' => $game,
+            'players' => $players
         ]);
     }
 

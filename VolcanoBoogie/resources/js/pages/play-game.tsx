@@ -2,6 +2,7 @@ import { PageProps } from '@inertiajs/core';
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { Game } from '@/interfaces/game';
+import { Player } from '@/interfaces/player';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { GameState } from '@/enums/game-state';
@@ -19,10 +20,11 @@ import NotificationPopup from '@/components/notification-popup';
 
 interface PlayGameProps extends PageProps {
     game: Game,
+    players: Player[]
 }
 
 export default function PlayGame() {
-    const { game, tiles } = usePage<PlayGameProps>().props;
+    const { game, players } = usePage<PlayGameProps>().props;
 
     const DEFAULT_CANVAS_CENTER: Coordinate = {x: 0, y: 0};
     const DEFAULT_ZOOM_FACTOR: number = 1;
