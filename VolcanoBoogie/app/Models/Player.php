@@ -9,7 +9,7 @@ use App\Enums\ExplorerRole;
 use App\Enums\Item;
 use App\Enums\PlayerStatus;
 
-#[Fillable(['game_id', 'explorer_role', 'current_health', 'max_health', 'item', 'player_status'])]
+#[Fillable(['game_id', 'explorer_role', 'current_health', 'max_health', 'item', 'player_status', 'turn_order'])]
 class Player extends Model
 {
     public function game(): BelongsTo
@@ -26,6 +26,7 @@ class Player extends Model
             'max_health' => 'integer',
             'item' => Item::class,
             'player_status' => PlayerStatus::class,
+            'turn_order' => 'integer'
         ];
     }
 }

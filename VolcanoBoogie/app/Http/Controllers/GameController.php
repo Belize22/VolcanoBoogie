@@ -106,7 +106,7 @@ class GameController extends Controller
             'turns' => $startingTurns
         ]);
 
-        foreach ($request['selectedExplorerRoles'] as $selectedExplorer) {
+        foreach ($request['selectedExplorerRoles'] as $index => $selectedExplorer) {
             Player::create([
                 'game_id' => $game->id,
                 'explorer_role' => ExplorerRole::from($selectedExplorer),
@@ -114,6 +114,7 @@ class GameController extends Controller
                 'max_health' => 5,
                 'item' => NULL,
                 'player_status' => PlayerStatus::ACTIVE,
+                'turn_order' => $index + 1,
             ]);
         }
 
