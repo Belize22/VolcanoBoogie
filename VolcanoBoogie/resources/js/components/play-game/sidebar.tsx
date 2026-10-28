@@ -1,15 +1,18 @@
 import { router } from '@inertiajs/react';
 import { Dispatch, SetStateAction } from 'react';
 import { Coordinate } from '@/interfaces/coordinate';
+import { Player } from '@/interfaces/player';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { GameState } from '@/enums/game-state';
 import { GameStatus } from '@/enums/game-status';
 import { FileChartColumn, SquareMenu } from 'lucide-react';
 import ControlPane from '@/components/play-game/control-pane';
+import ExplorerOverviewCard from '@/components/play-game/explorer-overview-card'
 import RotationPane from '@/components/play-game/rotation-pane';
 import InformationPane from '@/components/play-game/information-pane';
 
 type Props = {
+    currentPlayers: Player[],
     setCanvasCenter: Dispatch<SetStateAction<Coordinate>>;
     defaultCanvasCenter: Coordinate;
     zoomFactor: number;
@@ -30,6 +33,7 @@ type Props = {
 };
 
 export default function Sidebar({
+    currentPlayers,
     setCanvasCenter,
     defaultCanvasCenter,
     zoomFactor,
@@ -72,6 +76,14 @@ export default function Sidebar({
                     rotateTile={gameState === GameState.ROTATING_TILE ? rotateTile : rotateSanctum}
                 />
             }
+
+            <hr className="border-t border-stone-100 m-2" />
+            
+            {currentPlayers.map((currentPlayer) => (
+                <ExplorerOverviewCard
+                    player={currentPlayer}
+                />
+            ))}
 
             {gameStatus === GameStatus.COMPLETE && 
                 <div className="mt-auto flex flex-col items-center justify-center py-2">

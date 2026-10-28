@@ -49,6 +49,7 @@ export default function PlayGame() {
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
+    const [currentPlayers, setCurrentPlayers] = useState<Player[]>(players);
     const [availableSpots, setAvailableSpots] = useState<Coordinate[]>([]);
 
     function triggerErrorMessage(message: string) {
@@ -310,6 +311,7 @@ export default function PlayGame() {
                 />
                 <Footer />
                 <Sidebar
+                    currentPlayers={currentPlayers}
                     setCanvasCenter={setCanvasCenter}
                     defaultCanvasCenter={DEFAULT_CANVAS_CENTER}
                     zoomFactor={zoomFactor}
