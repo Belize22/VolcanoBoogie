@@ -328,6 +328,7 @@ export default function PlayGame() {
                     rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
                     gameStatus={currentGame.status}
+                    turns={currentGame.board.turns}
                     setIsModalOpen={setIsModalOpen}
                 />
                 <NotificationPopup

@@ -29,6 +29,7 @@ type Props = {
     rotateSanctum: (isClockwise: boolean) => void;
     gameState: GameState;
     gameStatus: GameStatus;
+    turns: number;
     setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -50,6 +51,7 @@ export default function Sidebar({
     rotateSanctum,
     gameState,
     gameStatus,
+    turns,
     setIsModalOpen
 }: Props) {
     return (
@@ -57,6 +59,7 @@ export default function Sidebar({
             <InformationPane
                 gameState={gameState}
                 zoomFactor={zoomFactor}
+                turns={turns}
             />
             <ControlPane
                 setCanvasCenter={setCanvasCenter}
