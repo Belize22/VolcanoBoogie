@@ -89,22 +89,25 @@ export default function Sidebar({
             ))}
 
             {gameStatus === GameStatus.COMPLETE && 
-                <div className="mt-auto flex flex-col items-center justify-center py-2">
-                    <button 
-                        className="flex justify-center gap-2 p-2 w-4/5 bg-stone-400 rounded-lg hover:scale-110 my-1"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        <FileChartColumn className="text-stone-800"/>
-                        <p className="text-stone-800">View Results</p>
-                    </button>
-                    <button 
-                        className="flex justify-center gap-2 p-2 w-4/5 bg-stone-400 rounded-lg hover:scale-110 my-1"
-                        onClick={() => {router.get('/play-game');}}
-                    >
-                        <SquareMenu className="text-stone-800"/>
-                        <p className="text-stone-800">Back to Game Menu</p>
-                    </button>
-                </div>
+                <>
+                    <hr className="border-t border-stone-100 m-2" />
+                    <div className="mt-auto flex flex-col items-center justify-center py-2 m-1">
+                        <button 
+                            className="flex justify-center gap-2 p-2 w-4/5 bg-stone-400 rounded-lg hover:scale-110 my-1"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            <FileChartColumn className="text-stone-800"/>
+                            <p className="text-stone-800">View Results</p>
+                        </button>
+                        <button 
+                            className="flex justify-center gap-2 p-2 w-4/5 bg-stone-400 rounded-lg hover:scale-110 my-1"
+                            onClick={() => {router.get('/play-game');}}
+                        >
+                            <SquareMenu className="text-stone-800"/>
+                            <p className="text-stone-800">Back to Game Menu</p>
+                        </button>
+                    </div>
+                </>
             }
         </div>
     );

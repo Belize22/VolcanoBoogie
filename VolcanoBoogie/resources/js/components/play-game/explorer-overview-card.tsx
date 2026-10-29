@@ -155,7 +155,7 @@ export default function ExplorerOverviewCard({
     }
 
     return (
-        <div className="bg-stone-700 border-l shadow-lg rounded-xl p-2 my-1">
+        <div className="bg-stone-700 border-l shadow-lg rounded-xl p-2 m-1">
             <div>
                 <div className="flex items-center">
                     <p className="text-lg">

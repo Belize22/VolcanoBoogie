@@ -66,7 +66,7 @@ export default function ControlPane({
     }
 
     return (
-        <div className="flex justify-center bg-stone-700 border-l shadow-lg rounded-xl p-4 my-1">
+        <div className="flex justify-center bg-stone-700 border-l shadow-lg rounded-xl p-4 m-1">
             <Gamepad
                 className={
                     canvasInteractionState === CanvasInteractionState.GAME_INTERACTION ? 

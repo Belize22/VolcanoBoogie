@@ -14,7 +14,7 @@ export default function RotationPane({
     const ICON_STYLE = "mx-1 text-stone-900";
 
     return (
-        <div className="flex justify-center bg-stone-700 border-l shadow-lg rounded-xl p-2 my-1">
+        <div className="flex justify-center bg-stone-700 border-l shadow-lg rounded-xl p-2 m-1">
             <button className={ROTATION_BUTTON_STYLE}>
                 <RotateCcw
                     className={ICON_STYLE}

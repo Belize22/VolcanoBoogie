@@ -38,7 +38,7 @@ export default function InformationPane({
     }
 
     return (
-        <div className="flex items-center bg-stone-700 border-l shadow-lg rounded-2xl p-4 my-1">
+        <div className="flex items-center bg-stone-700 border-l shadow-lg rounded-2xl p-4 m-1">
             <div className="flex flex-col">
                 <p>Current Action: {prettyPrintGameState(gameState)}</p>
                 <p>Zoom Factor: {zoomFactor}</p>
