@@ -9,9 +9,12 @@ import {
     MapPin,
     Cross,
     HeartOff,
-    Heart
+    Heart,
+    Key,
+    Gem
 } from 'lucide-react'
 import { ExplorerRole } from '@/enums/explorer-role';
+import { Item } from '@/enums/item';
 import { Player } from '@/interfaces/player';
 
 type Props = {
@@ -126,6 +129,31 @@ export default function ExplorerOverviewCard({
         );
     }
 
+    function retrieveCurrentItem() {
+        if (player.item === Item.KEY) {
+            return (
+                <div className="bg-stone-800 ml-auto rounded-3xl p-2 border-2 border-stone-100">
+                    <Key className="size-6 text-amber-400"/>
+                </div>
+            );
+        }
+
+        if (player.item === Item.ARTIFACT) {
+            return (
+                <div className="bg-red-700 ml-auto rounded-3xl p-2 border-2 border-stone-100">
+                    <Gem className="size-6 text-amber-400"/>
+                </div>
+            );
+        }
+
+        //No item.
+        return (
+            <div className="ml-auto rounded-3xl p-2 border-2 border-dotted border-stone-100">
+                <HeartOff className="size-6 text-stone-100 opacity-0"/>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-stone-700 border-l shadow-lg rounded-xl p-2 my-1">
             <div>
@@ -140,15 +168,7 @@ export default function ExplorerOverviewCard({
                 <div className="flex items-center">
                     {retrieveExplorerBadge()}
                     {formHealthUI()}
-
-                    {/*
-                        Placeholder icon for currently held item.
-                        This is what it will look like if the explorer
-                        has no item currently being held.
-                    */}
-                    <div className="ml-auto rounded-3xl p-2 border-2 border-dotted border-stone-100">
-                        <HeartOff className="size-6 text-stone-100 opacity-0"/>
-                    </div>
+                    {retrieveCurrentItem()}
                 </div>
             </div>
         </div>
