@@ -27,14 +27,14 @@ export default function ExplorerOverviewCard({
         for (let i = 0; i < player.max_health; i++) {
             if (i < player.current_health) {
                 healthTokens.push(
-                    <div className="bg-stone-400 rounded-xl p-1 mx-1">
+                    <div className="bg-stone-200 rounded-xl p-1 border-2 border-stone-900">
                         <Heart className="size-4 text-stone-900"/>
                     </div>
                 )
             }
             else {
                 healthTokens.push(
-                    <div className="bg-stone-400 rounded-xl p-1 mx-1 opacity-50">
+                    <div className="bg-stone-200 rounded-xl p-1 border-2 border-stone-900 opacity-50">
                         <HeartOff className="size-4 text-stone-900"/>
                     </div>
                 )
@@ -47,7 +47,7 @@ export default function ExplorerOverviewCard({
     function retrieveExplorerBadge() {
         if (player.explorer_role === ExplorerRole.SAPPER) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
+                <div className="bg-red-500 rounded-3xl p-2 border-2 mr-2 border-stone-100">
                     <Bomb className="size-6 text-stone-100"/>
                 </div>
             );
@@ -55,23 +55,23 @@ export default function ExplorerOverviewCard({
 
         if (player.explorer_role === ExplorerRole.FOREMAN) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
-                    <Pickaxe className="size-6 text-stone-100"/>
+                <div className="bg-blue-400 rounded-3xl p-2 border-2 mr-2 border-stone-900">
+                    <Pickaxe className="size-6 text-stone-900"/>
                 </div>
             );
         }
 
         if (player.explorer_role === ExplorerRole.VETERAN) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
-                    <Shield className="size-6 text-stone-100"/>
+                <div className="bg-yellow-300 rounded-3xl p-2 border-2 mr-2 border-stone-900">
+                    <Shield className="size-6 text-stone-900"/>
                 </div>
             );
         }        
         
         if (player.explorer_role === ExplorerRole.MARKSMAN) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
+                <div className="bg-green-900 rounded-3xl p-2 border-2 mr-2 border-stone-100">
                     <Crosshair className="size-6 text-stone-100"/>
                 </div>
             );
@@ -79,7 +79,7 @@ export default function ExplorerOverviewCard({
 
         if (player.explorer_role === ExplorerRole.ARISTOCRAT) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
+                <div className="bg-purple-700 rounded-3xl p-2 border-2 mr-2 border-stone-100">
                     <BookOpenText className="size-6 text-stone-100"/>
                 </div>
             );
@@ -88,7 +88,7 @@ export default function ExplorerOverviewCard({
 
         if (player.explorer_role === ExplorerRole.ARCHAEOLOGIST) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
+                <div className="bg-yellow-900 rounded-3xl p-2 border-2 mr-2 border-stone-100">
                     <Dices className="size-6 text-stone-100"/>
                 </div>
             );
@@ -96,7 +96,7 @@ export default function ExplorerOverviewCard({
 
         if (player.explorer_role === ExplorerRole.ROGUE) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
+                <div className="bg-gray-950 rounded-3xl p-2 border-2 mr-2 border-stone-100">
                     <Footprints className="size-6 text-stone-100"/>
                 </div>
             );
@@ -104,24 +104,24 @@ export default function ExplorerOverviewCard({
 
         if (player.explorer_role === ExplorerRole.GUIDE) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
-                    <MapPin className="size-6 text-stone-100"/>
+                <div className="bg-orange-200 rounded-3xl p-2 border-2 mr-2 border-stone-900">
+                    <MapPin className="size-6 text-stone-900"/>
                 </div>
             );
         }
 
         if (player.explorer_role === ExplorerRole.HEALER) {
             return (
-                <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
-                    <Cross className="size-6 text-stone-100"/>
+                <div className="bg-gray-400 rounded-3xl p-2 border-2 mr-2 border-stone-900">
+                    <Cross className="size-6 text-stone-900"/>
                 </div>
             );
         }
 
         //PRIEST
         return (
-            <div className="bg-stone-800 rounded-3xl p-2 border-2 mr-2 border-stone-100">
-                <HeartOff className="size-6 text-stone-100"/>
+            <div className="bg-gray-100 rounded-3xl p-2 border-2 mr-2 border-stone-900">
+                <HeartOff className="size-6 text-stone-900"/>
             </div>
         );
     }
