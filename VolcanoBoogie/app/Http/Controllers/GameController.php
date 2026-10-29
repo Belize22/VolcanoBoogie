@@ -103,11 +103,13 @@ class GameController extends Controller
 
         $board = Board::create([
             'game_id' => $game->id,
-            'turns' => $startingTurns
+            'turns' => $startingTurns,
+            'turns_remaining' => $startingTurns,
+            'is_cursed' => false
         ]);
 
         foreach ($request['selectedExplorerRoles'] as $index => $selectedExplorer) {
-            Player::create([
+            $player = Player::create([
                 'game_id' => $game->id,
                 'explorer_role' => ExplorerRole::from($selectedExplorer),
                 'current_health' => 5,
@@ -116,6 +118,11 @@ class GameController extends Controller
                 'player_status' => PlayerStatus::ACTIVE,
                 'turn_order' => $index + 1,
             ]);
+
+            if ($index === 0) {
+                $game->current_player = $player->id;
+                $game->save();
+            }
         }
 
         $bag = Bag::create([

@@ -9,6 +9,7 @@ use App\Enums\GameState;
 use App\Enums\GameStatus;
 use App\Models\Bag;
 use App\Models\Board;
+use App\Models\Player;
 
 #[Fillable(['status', 'game_state'])]
 class Game extends Model
@@ -23,6 +24,11 @@ class Game extends Model
     public function bag(): HasOne
     {
         return $this->hasOne(Bag::class);
+    }
+
+    public function currentPlayer(): HasOne
+    {
+        return $this->hasOne(Player::class);
     }
 
     protected function casts(): array

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\BaggedTile;
 use App\Models\Game;
 
-#[Fillable(['game_id', 'turns'])]
+#[Fillable(['game_id', 'turns', 'turns_remaining', 'is_cursed'])]
 class Board extends Model
 {
     protected $hidden = ['created_at', 'updated_at'];
@@ -29,6 +29,8 @@ class Board extends Model
         return [
             'game_id' => 'integer',
             'turns' => 'integer',
+            'turns_remaining' => 'integer',
+            'is_cursed' => 'boolean'
         ];
     }
 }
