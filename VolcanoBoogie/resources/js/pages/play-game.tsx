@@ -193,6 +193,30 @@ export default function PlayGame() {
         });
     }
 
+    function endTurn() {
+        fetch('/api/end-turn', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                gameId: currentGame.id,
+            })
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                console.log(data.game);
+                setCurrentGame(data.game);
+            }
+            else if (data.error) {
+                console.log(data);
+                triggerErrorMessage(data.message);
+            }
+        });
+    }
+
     function rotateTile(isClockwise: boolean) {
         const previousGame = currentGame;
         const placedTiles = currentGame.board.placed_tiles;
@@ -309,7 +333,9 @@ export default function PlayGame() {
                     gameCanvasRef={gameCanvasRef}
                     gameState={currentGame.game_state}
                 />
-                <Footer />
+                <Footer
+                    endTurn={endTurn}
+                />
                 <Sidebar
                     currentPlayers={currentPlayers}
                     setCanvasCenter={setCanvasCenter}
@@ -328,7 +354,7 @@ export default function PlayGame() {
                     rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
                     gameStatus={currentGame.status}
-                    turns={currentGame.board.turns}
+                    turns={currentGame.board.turns_remaining}
                     setIsModalOpen={setIsModalOpen}
                 />
                 <NotificationPopup
