@@ -117,6 +117,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'currentPlayer'
         ])->first();
 
         return response()->json([
@@ -216,6 +217,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'currentPlayer'
         ])->first();
 
         return response()->json([
@@ -262,6 +264,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'currentPlayer'
         ])->first();
         
         return response()->json([
@@ -351,6 +354,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'currentPlayer'
         ])->first();
         
         return response()->json([

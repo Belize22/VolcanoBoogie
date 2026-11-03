@@ -32,6 +32,7 @@ class GameController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'currentPlayer'
         ])->where('id', $id)->first();
 
         if (!$game) {

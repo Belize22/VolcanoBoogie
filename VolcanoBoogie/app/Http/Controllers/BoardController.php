@@ -41,6 +41,7 @@ class BoardController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'currentPlayer'
         ])->first();
 
         return response()->json([
