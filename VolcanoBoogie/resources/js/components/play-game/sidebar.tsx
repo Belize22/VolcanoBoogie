@@ -29,6 +29,7 @@ type Props = {
     rotateSanctum: (isClockwise: boolean) => void;
     gameState: GameState;
     gameStatus: GameStatus;
+    currentPlayerId: number | null;
     turns: number;
     setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
@@ -51,6 +52,7 @@ export default function Sidebar({
     rotateSanctum,
     gameState,
     gameStatus,
+    currentPlayerId,
     turns,
     setIsModalOpen
 }: Props) {
@@ -85,6 +87,7 @@ export default function Sidebar({
             {currentPlayers.map((currentPlayer) => (
                 <ExplorerOverviewCard
                     player={currentPlayer}
+                    currentPlayerId={currentPlayerId}
                 />
             ))}
 

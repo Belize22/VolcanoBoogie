@@ -19,11 +19,16 @@ import { Player } from '@/interfaces/player';
 
 type Props = {
     player: Player;
+    currentPlayerId: number | null;
 }
 
 export default function ExplorerOverviewCard({
-    player
+    player,
+    currentPlayerId
 }: Props) {
+    const NON_CURRENT_PLAYER_STYLE = "bg-stone-700 border-l shadow-lg rounded-xl p-2 m-1";
+    const CURRENT_PLAYER_STYLE = "bg-slate-600 border-l shadow-lg rounded-xl p-2 m-1";
+
     function formHealthUI() {
         const healthTokens = [];
 
@@ -155,7 +160,7 @@ export default function ExplorerOverviewCard({
     }
 
     return (
-        <div className="bg-stone-700 border-l shadow-lg rounded-xl p-2 m-1">
+        <div className={player.id === currentPlayerId ? CURRENT_PLAYER_STYLE : NON_CURRENT_PLAYER_STYLE}>
             <div>
                 <div className="flex items-center">
                     <p className="text-lg">

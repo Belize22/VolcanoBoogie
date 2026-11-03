@@ -354,6 +354,7 @@ export default function PlayGame() {
                     rotateSanctum={rotateSanctum}
                     gameState={currentGame.game_state}
                     gameStatus={currentGame.status}
+                    currentPlayerId={currentGame.current_player ? currentGame.current_player.id : null}
                     turns={currentGame.board.turns_remaining}
                     setIsModalOpen={setIsModalOpen}
                 />
