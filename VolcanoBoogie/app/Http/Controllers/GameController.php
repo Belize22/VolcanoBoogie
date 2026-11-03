@@ -118,12 +118,8 @@ class GameController extends Controller
                 'item' => NULL,
                 'player_status' => PlayerStatus::ACTIVE,
                 'turn_order' => $index + 1,
+                'is_current_player' => $index === 0
             ]);
-
-            if ($index === 0) {
-                $game->current_player = $player->id;
-                $game->save();
-            }
         }
 
         $bag = Bag::create([

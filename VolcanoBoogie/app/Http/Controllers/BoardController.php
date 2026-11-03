@@ -12,30 +12,30 @@ class BoardController extends Controller
 {
     public function endTurn(Request $request)
     {
-        $playerIds = Player::where('game_id', $request->gameId)
-            ->orderBy('id')
-            ->pluck('id')
-            ->toArray();
+        $playerQuantity = Player::where('game_id', $request->gameId)
+            ->count();
 
-        $currentPlayerId = Game::where('id', $request->gameId)
-            ->pluck('current_player')
+        $currentPlayer = Player::where('game_id', $request->gameId)
+            ->where('is_current_player', true)
+            ->first();
+        
+        $nextPlayer = Player::where('game_id', $request->gameId)
+            ->where('turn_order', $currentPlayer->turn_order !== $playerQuantity ? $currentPlayer->turn_order + 1 : 1)
             ->first();
 
-        $game = Game::where('id', $request->gameId)->first();
-        if (in_array($currentPlayerId + 1, $playerIds)) {
-            $game->current_player = $currentPlayerId + 1;
-            $game->save();
-        }
-        else {
-            $game->current_player = min($playerIds);
-            $game->save();
+        $currentPlayer->is_current_player = false;
+        $currentPlayer->save();
 
+        $nextPlayer->is_current_player = true;
+        $nextPlayer->save();
+
+        if ($currentPlayer->turn_order + 1 > $playerQuantity) {
             $board = Board::where('game_id', $request->gameId)->first();
             if ($board->turns_remaining > 0) {
                 $board->turns_remaining = $board->turns_remaining - 1;
                 $board->save();
             }
-        }        
+        }
         
         $activeGame = Game::where('id', $request->gameId)->with([
             'board.placedTiles.anchor',

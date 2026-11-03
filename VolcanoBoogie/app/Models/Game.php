@@ -28,7 +28,7 @@ class Game extends Model
 
     public function currentPlayer(): HasOne
     {
-        return $this->hasOne(Player::class);
+        return $this->hasOne(Player::class)->where('is_current_player', true);
     }
 
     protected function casts(): array
