@@ -11,13 +11,18 @@ import {
     Dice5,
     Dice6
 } from 'lucide-react';
+import { Dice } from '@/interfaces/dice';
 
 type Props = {
-
+    diceTray: Dice[]
 }
 
 export default function ControlPane({
+    diceTray
 }: Props) {
+    console.log("DICE TRAY");
+    console.log(diceTray);
+    
     function retrieveHazardDice() {
         const hazardDiceIcon = retrieveHazardDiceIcon();
 

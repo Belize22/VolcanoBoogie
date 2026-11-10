@@ -1,6 +1,7 @@
 import { PageProps } from '@inertiajs/core';
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
+import { Dice } from '@/interfaces/dice';
 import { Game } from '@/interfaces/game';
 import { Player } from '@/interfaces/player';
 import { Coordinate } from '@/interfaces/coordinate';
@@ -50,6 +51,7 @@ export default function PlayGame() {
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
     const [currentPlayers, setCurrentPlayers] = useState<Player[]>(players);
+    const [diceTray, setDiceTray] = useState<Dice[]>([]); 
     const [availableSpots, setAvailableSpots] = useState<Coordinate[]>([]);
 
     function triggerErrorMessage(message: string) {
@@ -207,9 +209,8 @@ export default function PlayGame() {
         .then((response) => response.json())
         .then((data) => {
             if (data.success) {
-                console.log(data.game);
-                console.log(data.diceRoll);
                 setCurrentGame(data.game);
+                setDiceTray(data.diceRoll.dice);
             }
             else if (data.error) {
                 console.log(data);
@@ -358,6 +359,7 @@ export default function PlayGame() {
                     currentPlayerId={currentGame.current_player ? currentGame.current_player.id : null}
                     turns={currentGame.board.turns_remaining}
                     isCursed={currentGame.board.is_cursed}
+                    diceTray={diceTray}
                     setIsModalOpen={setIsModalOpen}
                 />
                 <NotificationPopup

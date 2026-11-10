@@ -1,6 +1,7 @@
 import { router } from '@inertiajs/react';
 import { Dispatch, SetStateAction } from 'react';
 import { Coordinate } from '@/interfaces/coordinate';
+import { Dice } from '@/interfaces/dice';
 import { Player } from '@/interfaces/player';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
 import { GameState } from '@/enums/game-state';
@@ -33,6 +34,7 @@ type Props = {
     currentPlayerId: number | null;
     turns: number;
     isCursed: boolean;
+    diceTray: Dice[];
     setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -57,6 +59,7 @@ export default function Sidebar({
     currentPlayerId,
     turns,
     isCursed,
+    diceTray,
     setIsModalOpen
 }: Props) {
     return (
@@ -85,7 +88,9 @@ export default function Sidebar({
                     rotateTile={gameState === GameState.ROTATING_TILE ? rotateTile : rotateSanctum}
                 />
             }
-            <DicePane/>
+            <DicePane
+                diceTray={diceTray}
+            />
 
             <hr className="border-t border-stone-100 m-2" />
             
