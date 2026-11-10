@@ -19,16 +19,24 @@ class BoardController extends Controller
     const MIN_NUMBER_DICE_VALUE = 1;
     const MAX_NUMBER_DICE_VALUE = 6;
 
+    const REGULAR_TURN_DECREMENT = 1;
+    const CURSED_TURN_DECREMENT = 2;
+
     public function endTurn(Request $request)
     {
-        $this->advanceTurn($request);
-        
         $board = Board::where('game_id', $request->gameId)->first();
+
+        $this->advanceTurn($request, $board->is_cursed);
+
         $diceRoll = DiceRoll::create([
             'board_id' => $board->id
         ]);
 
         $this->rollHazardDice($diceRoll);
+
+        if ($board->is_cursed) {
+            $this->rollHazardDice($diceRoll);
+        }
 
         $activeGame = Game::where('id', $request->gameId)->with([
             'board.placedTiles.anchor',
@@ -50,7 +58,7 @@ class BoardController extends Controller
         ], 200);
     }
 
-    private function advanceTurn(Request $request)
+    private function advanceTurn(Request $request, bool $isCursed)
     {
         $playerQuantity = Player::where('game_id', $request->gameId)
             ->count();
@@ -75,7 +83,9 @@ class BoardController extends Controller
         if ($currentPlayer->turn_order + 1 > $playerQuantity) {
             $board = Board::where('game_id', $request->gameId)->first();
             if ($board->turns_remaining > 0) {
-                $board->turns_remaining = $board->turns_remaining - 1;
+                $turnsRemaining = $board->turns_remaining - ($isCursed 
+                    ? BoardController::CURSED_TURN_DECREMENT : BoardController::REGULAR_TURN_DECREMENT);
+                $board->turns_remaining = $turnsRemaining < 0 ? 0 : $turnsRemaining;
                 $board->save();
             }
         }

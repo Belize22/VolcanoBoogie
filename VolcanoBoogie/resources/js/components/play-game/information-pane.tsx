@@ -5,12 +5,14 @@ type Props = {
     gameState: GameState;
     zoomFactor: number;
     turns: number;
+    isCursed: boolean;
 };
 
 export default function InformationPane({
     gameState,
     zoomFactor,
-    turns
+    turns,
+    isCursed
 }: Props) {
     function prettyPrintGameState(gameState: string) { 
         //Replace underscores with spaces.
@@ -23,16 +25,16 @@ export default function InformationPane({
     }
 
     function getExplorerToken() {
+        if (isCursed) {
+            return (
+                <div className="bg-red-800 ml-auto rounded-3xl p-2 m-1 border-2 border-stone-900">
+                    <Swords className="size-7 text-yellow-300"/>
+                </div>
+            );
+        }
         return (
             <div className="bg-green-800 ml-auto rounded-3xl p-2 m-1 border-2 border-stone-900">
                 <Sword className="size-7 text-amber-300"/>
-            </div>
-        );
-
-        {/* Cursed side. Conditional to be implemented once back-end is updated accordingly. */}
-        return (
-            <div className="bg-red-800 ml-auto rounded-3xl p-2 m-1 border-2 border-stone-900">
-                <Swords className="size-7 text-yellow-300"/>
             </div>
         );
     }

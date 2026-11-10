@@ -357,6 +357,7 @@ export default function PlayGame() {
                     gameStatus={currentGame.status}
                     currentPlayerId={currentGame.current_player ? currentGame.current_player.id : null}
                     turns={currentGame.board.turns_remaining}
+                    isCursed={currentGame.board.is_cursed}
                     setIsModalOpen={setIsModalOpen}
                 />
                 <NotificationPopup

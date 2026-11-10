@@ -31,6 +31,7 @@ type Props = {
     gameStatus: GameStatus;
     currentPlayerId: number | null;
     turns: number;
+    isCursed: boolean;
     setIsModalOpen: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -54,6 +55,7 @@ export default function Sidebar({
     gameStatus,
     currentPlayerId,
     turns,
+    isCursed,
     setIsModalOpen
 }: Props) {
     return (
@@ -62,6 +64,7 @@ export default function Sidebar({
                 gameState={gameState}
                 zoomFactor={zoomFactor}
                 turns={turns}
+                isCursed={isCursed}
             />
             <ControlPane
                 setCanvasCenter={setCanvasCenter}
