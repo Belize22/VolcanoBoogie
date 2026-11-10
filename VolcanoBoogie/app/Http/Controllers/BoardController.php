@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Enums\Hazard;
 use App\Models\Board;
 use App\Models\Game;
 use App\Models\Player;
@@ -35,6 +36,15 @@ class BoardController extends Controller
                 $board->turns_remaining = $board->turns_remaining - 1;
                 $board->save();
             }
+        }
+
+        $hazardValues = Hazard::cases();
+        $selectedHazardValue = $hazardValues[rand(0, count($hazardValues) - 1)];
+
+        \Log::info($selectedHazardValue->value);
+
+        if ($selectedHazardValue === Hazard::CAVE_IN) {
+            \Log::info(rand(1, 6));
         }
         
         $activeGame = Game::where('id', $request->gameId)->with([
