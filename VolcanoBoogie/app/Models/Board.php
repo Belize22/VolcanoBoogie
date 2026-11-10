@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Models\BaggedTile;
+use App\Models\DiceRolls;
 use App\Models\Game;
 
 #[Fillable(['game_id', 'turns', 'turns_remaining', 'is_cursed'])]
@@ -22,6 +23,11 @@ class Board extends Model
     public function placedTiles(): HasMany
     {
         return $this->hasMany(PlacedTile::class);
+    }
+
+    public function diceRolls(): HasMany
+    {
+        return $this->hasMany(DiceRoll::class);
     }
 
     protected function casts(): array

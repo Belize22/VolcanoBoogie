@@ -22,8 +22,11 @@ class BoardController extends Controller
     public function endTurn(Request $request)
     {
         $this->advanceTurn($request);
-
-        $diceRoll = DiceRoll::create();
+        
+        $board = Board::where('game_id', $request->gameId)->first();
+        $diceRoll = DiceRoll::create([
+            'board_id' => $board->id
+        ]);
 
         $this->rollHazardDice($diceRoll);
 
