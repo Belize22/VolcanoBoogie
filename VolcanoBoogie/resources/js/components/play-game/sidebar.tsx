@@ -7,6 +7,7 @@ import { GameState } from '@/enums/game-state';
 import { GameStatus } from '@/enums/game-status';
 import { FileChartColumn, SquareMenu } from 'lucide-react';
 import ControlPane from '@/components/play-game/control-pane';
+import DicePane from '@/components/play-game/dice-pane';
 import ExplorerOverviewCard from '@/components/play-game/explorer-overview-card'
 import RotationPane from '@/components/play-game/rotation-pane';
 import InformationPane from '@/components/play-game/information-pane';
@@ -84,6 +85,7 @@ export default function Sidebar({
                     rotateTile={gameState === GameState.ROTATING_TILE ? rotateTile : rotateSanctum}
                 />
             }
+            <DicePane/>
 
             <hr className="border-t border-stone-100 m-2" />
             
