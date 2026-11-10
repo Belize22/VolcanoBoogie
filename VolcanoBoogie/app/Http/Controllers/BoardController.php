@@ -4,8 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Enums\Context;
 use App\Enums\Hazard;
 use App\Models\Board;
+use App\Models\Dice;
+use App\Models\DiceRoll;
+use App\Models\HazardDice;
+use App\Models\NumericalDice;
 use App\Models\Game;
 use App\Models\Player;
 
@@ -41,10 +46,23 @@ class BoardController extends Controller
         $hazardValues = Hazard::cases();
         $selectedHazardValue = $hazardValues[rand(0, count($hazardValues) - 1)];
 
-        \Log::info($selectedHazardValue->value);
+        $diceRoll = DiceRoll::create();
+        $dice = Dice::create();
+        $hazardDice = HazardDice::create([
+            'dice_id' => $dice->id,
+            'hazard' => $selectedHazardValue,
+        ]);
+        $diceRoll->dice()->attach([$dice->id]);
 
         if ($selectedHazardValue === Hazard::CAVE_IN) {
-            \Log::info(rand(1, 6));
+            $diceValue = rand(1, 6);
+            $dice = Dice::create();
+            $numericalDice = NumericalDice::create([
+                'dice_id' => $dice->id,
+                'value' => $diceValue,
+                'context' => Context::CAVE_IN,
+            ]);
+            $diceRoll->dice()->attach([$dice->id]);
         }
         
         $activeGame = Game::where('id', $request->gameId)->with([
