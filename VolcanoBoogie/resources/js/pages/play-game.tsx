@@ -208,6 +208,7 @@ export default function PlayGame() {
         .then((data) => {
             if (data.success) {
                 console.log(data.game);
+                console.log(data.diceRoll);
                 setCurrentGame(data.game);
             }
             else if (data.error) {

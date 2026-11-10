@@ -72,10 +72,16 @@ class BoardController extends Controller
             'currentPlayer'
         ])->first();
 
+        $diceRoll = DiceRoll::where('id', $diceRoll->id)->with([
+            'dice.hazardDice',
+            'dice.numericalDice',
+        ])->first();
+
         return response()->json([
             'success' => true,
             'message' => 'Turn has been successfully advanced!',
             'game' => $activeGame,
+            'diceRoll' => $diceRoll,
         ], 200);
     }
 }
