@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { 
     Flame, 
     TriangleAlert, 
@@ -21,8 +22,9 @@ type Props = {
 export default function ControlPane({
     diceTray
 }: Props) {
-    console.log("DICE TRAY");
-    console.log(diceTray);
+    const DICE_PANE_TIMER = 5000; //in seconds
+
+    const [isVisible, setIsVisible] = useState<boolean>(false);
 
     function retrieveHazardDice(hazard: Hazard) {
         const hazardDiceIcon = retrieveHazardDiceIcon(hazard);
@@ -145,13 +147,29 @@ export default function ControlPane({
         );
     }
 
+    useEffect(() => {
+        setIsVisible(true);
+        
+        const timer = setTimeout(() => {
+            setIsVisible(false);
+        }, DICE_PANE_TIMER);
+
+        return () => {
+            clearTimeout(timer);
+        }
+    }, [diceTray])
+
     return (
-        <div className="flex items-center justify-center bg-stone-700 border-l shadow-lg rounded-xl p-2 m-1">
-            {diceTray.map((dice) => (
-                dice.hazard_dice !== null 
-                    ? retrieveHazardDice(dice.hazard_dice.hazard) 
-                    : dice.numerical_dice !== null ? retrieveNumericalDice(dice.numerical_dice.value) : <></>
-            ))}
-        </div>
+        <>
+            {isVisible && diceTray.length > 0 &&
+                <div className="flex items-center justify-center bg-stone-700 border-l shadow-lg rounded-xl p-2 m-1">
+                    {diceTray.map((dice) => (
+                        dice.hazard_dice !== null 
+                            ? retrieveHazardDice(dice.hazard_dice.hazard) 
+                            : dice.numerical_dice !== null ? retrieveNumericalDice(dice.numerical_dice.value) : <></>
+                    ))}
+                </div>
+            }
+        </>
     )
 }
