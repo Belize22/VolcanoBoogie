@@ -22,6 +22,7 @@ type Props = {
 export default function ControlPane({
     diceTray
 }: Props) {
+    const DICE_ICON_SIZE = 30;    //css styling
     const DICE_PANE_TIMER = 5000; //in seconds
 
     const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -100,7 +101,7 @@ export default function ControlPane({
         if (value === 1) {
             return (
                 <Dice1
-                    size={30}
+                    size={DICE_ICON_SIZE}
                     className="text-stone-100"
                 />
             );
@@ -108,7 +109,7 @@ export default function ControlPane({
         if (value === 2) {
             return (
                 <Dice2
-                    size={30}
+                    size={DICE_ICON_SIZE}
                     className="text-stone-100"
                 />
             );
@@ -116,7 +117,7 @@ export default function ControlPane({
         if (value === 3) {
             return (
                 <Dice3
-                    size={30}
+                    size={DICE_ICON_SIZE}
                     className="text-stone-100"
                 />
             );
@@ -124,7 +125,7 @@ export default function ControlPane({
         if (value === 4) {
             return (
                 <Dice4
-                    size={30}
+                    size={DICE_ICON_SIZE}
                     className="text-stone-100"
                 />
             );
@@ -132,7 +133,7 @@ export default function ControlPane({
         if (value === 5) {
             return (
                 <Dice5
-                    size={30}
+                    size={DICE_ICON_SIZE}
                     className="text-stone-100"
                 />
             );
@@ -141,7 +142,7 @@ export default function ControlPane({
         //6
         return (
             <Dice6
-                size={30}
+                size={DICE_ICON_SIZE}
                 className="text-stone-100"
             />
         );
