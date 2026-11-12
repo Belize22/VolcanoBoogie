@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\GameState;
 use App\Enums\GameStatus;
@@ -24,6 +25,11 @@ class Game extends Model
     public function bag(): HasOne
     {
         return $this->hasOne(Bag::class);
+    }
+
+    public function player(): HasMany
+    {
+        return $this->hasMany(Player::class);
     }
 
     public function currentPlayer(): HasOne

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Classes\Coordinate;
+use App\Classes\Player;
 use App\Models\PlacedTile;
 use App\Enums\PathType;
 use App\Enums\Rotation;
@@ -22,11 +23,6 @@ class PlacedSubtile extends Model
     public function placedTile(): BelongsTo
     {
         return $this->belongsTo(PlacedTile::class);
-    }
-
-    public function player(): BelongsTo
-    {
-        return $this->belongsTo(Player::class);
     }
 
     protected function coordinate(): Attribute

@@ -35,6 +35,7 @@ class GameController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'player',
             'currentPlayer'
         ])->where('id', $id)->first();
 
@@ -226,14 +227,6 @@ class GameController extends Controller
             }
         }
 
-        //All players start next to the escape tile.
-        $startingSubtile = PlacedSubtile::whereIn(
-                'placed_tile_id', PlacedTile::where('board_id', $board->id)->pluck('id')
-            )
-            ->where('x_coordinate', 0)
-            ->where('y_coordinate', 0)
-            ->first();
-
         foreach ($request['selectedExplorerRoles'] as $index => $selectedExplorer) {
             $player = Player::create([
                 'game_id' => $game->id,
@@ -244,7 +237,8 @@ class GameController extends Controller
                 'player_status' => PlayerStatus::ACTIVE,
                 'turn_order' => $index + 1,
                 'is_current_player' => $index === 0,
-                'current_placed_subtile_id' => $startingSubtile->id,
+                'x_coordinate' => 0,
+                'y_coordinate' => 0,
                 'actions_remaining' => GameController::MAX_ACTIONS_PER_TURN
             ]);
         }
