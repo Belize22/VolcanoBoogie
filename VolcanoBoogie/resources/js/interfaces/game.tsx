@@ -8,5 +8,6 @@ export interface Game {
     id: number,
     status: GameStatus,
     game_state: GameState,
-    current_player: Player | null,
+    players: Player[],
+    current_player: Player | null
 }

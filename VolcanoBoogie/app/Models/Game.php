@@ -27,7 +27,7 @@ class Game extends Model
         return $this->hasOne(Bag::class);
     }
 
-    public function player(): HasMany
+    public function players(): HasMany
     {
         return $this->hasMany(Player::class);
     }

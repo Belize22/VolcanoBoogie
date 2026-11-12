@@ -21,11 +21,10 @@ import NotificationPopup from '@/components/notification-popup';
 
 interface PlayGameProps extends PageProps {
     game: Game,
-    players: Player[]
 }
 
 export default function PlayGame() {
-    const { game, players } = usePage<PlayGameProps>().props;
+    const { game } = usePage<PlayGameProps>().props;
 
     const DEFAULT_CANVAS_CENTER: Coordinate = {x: 0, y: 0};
     const DEFAULT_ZOOM_FACTOR: number = 1;
@@ -50,7 +49,6 @@ export default function PlayGame() {
     const gameCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [currentGame, setCurrentGame] = useState<Game>(game);
-    const [currentPlayers, setCurrentPlayers] = useState<Player[]>(players);
     const [diceTray, setDiceTray] = useState<Dice[]>([]); 
     const [availableSpots, setAvailableSpots] = useState<Coordinate[]>([]);
 
@@ -339,7 +337,7 @@ export default function PlayGame() {
                     endTurn={endTurn}
                 />
                 <Sidebar
-                    currentPlayers={currentPlayers}
+                    currentPlayers={game.players}
                     setCanvasCenter={setCanvasCenter}
                     defaultCanvasCenter={DEFAULT_CANVAS_CENTER}
                     zoomFactor={zoomFactor}

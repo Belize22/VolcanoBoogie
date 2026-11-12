@@ -42,6 +42,7 @@ class BoardController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'players',
             'currentPlayer'
         ])->first();
 

@@ -117,6 +117,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'player',
             'currentPlayer'
         ])->first();
 
@@ -217,6 +218,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'player',
             'currentPlayer'
         ])->first();
 
@@ -264,6 +266,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'player',
             'currentPlayer'
         ])->first();
         
@@ -354,6 +357,7 @@ class TileController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
+            'player',
             'currentPlayer'
         ])->first();
         

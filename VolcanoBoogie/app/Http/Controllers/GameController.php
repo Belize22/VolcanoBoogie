@@ -35,7 +35,7 @@ class GameController extends Controller
             'board.placedTiles.anchor',
             'board.placedTiles.tile',
             'board.placedTiles.placedSubtiles',
-            'player',
+            'players',
             'currentPlayer'
         ])->where('id', $id)->first();
 
@@ -43,11 +43,8 @@ class GameController extends Controller
             abort(404);
         }
 
-        $players = Player::where('game_id', $game->id)->get();
-
         return Inertia::render('play-game', [
             'game' => $game,
-            'players' => $players
         ]);
     }
 
