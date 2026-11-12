@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use App\Enums\ExplorerRole;
 use App\Enums\Item;
@@ -17,13 +18,20 @@ use App\Enums\PlayerStatus;
     'item', 
     'player_status', 
     'turn_order', 
-    'is_current_player'
+    'is_current_player',
+    'current_placed_subtile_id',
+    'actions_remaining'
 ])]
 class Player extends Model
 {
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
+    }
+
+    public function currentPlacedSubtile(): HasOne
+    {
+        return $this->hasOne(PlacedSubtile::class);
     }
 
     protected function casts(): array
@@ -36,7 +44,9 @@ class Player extends Model
             'item' => Item::class,
             'player_status' => PlayerStatus::class,
             'turn_order' => 'integer',
-            'is_current_player' => 'boolean'
+            'is_current_player' => 'boolean',
+            'current_placed_subtile_id' => 'integer',
+            'actions_remaining' => 'integer'
         ];
     }
 }

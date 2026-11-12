@@ -24,6 +24,11 @@ class PlacedSubtile extends Model
         return $this->belongsTo(PlacedTile::class);
     }
 
+    public function player(): BelongsTo
+    {
+        return $this->belongsTo(Player::class);
+    }
+
     protected function coordinate(): Attribute
     {
         return Attribute::make(

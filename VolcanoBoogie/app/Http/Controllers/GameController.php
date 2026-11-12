@@ -26,6 +26,9 @@ use App\Enums\TileType;
 
 class GameController extends Controller
 {
+    const MAX_ACTIONS_PER_TURN = 3;
+    const MAX_HEALTH = 5;           //Placeholder. Specific max health based on explorer role coming soon.
+
     public function playGame(String $id)
     {
         $game = Game::with([
@@ -108,19 +111,6 @@ class GameController extends Controller
             'turns_remaining' => $startingTurns,
             'is_cursed' => false
         ]);
-
-        foreach ($request['selectedExplorerRoles'] as $index => $selectedExplorer) {
-            $player = Player::create([
-                'game_id' => $game->id,
-                'explorer_role' => ExplorerRole::from($selectedExplorer),
-                'current_health' => 5,
-                'max_health' => 5,
-                'item' => NULL,
-                'player_status' => PlayerStatus::ACTIVE,
-                'turn_order' => $index + 1,
-                'is_current_player' => $index === 0
-            ]);
-        }
 
         $bag = Bag::create([
             'game_id' => $game->id,
@@ -234,6 +224,29 @@ class GameController extends Controller
                 $placedTile->anchor = $anchor->id;
                 $placedTile->save();
             }
+        }
+
+        //All players start next to the escape tile.
+        $startingSubtile = PlacedSubtile::whereIn(
+                'placed_tile_id', PlacedTile::where('board_id', $board->id)->pluck('id')
+            )
+            ->where('x_coordinate', 0)
+            ->where('y_coordinate', 0)
+            ->first();
+
+        foreach ($request['selectedExplorerRoles'] as $index => $selectedExplorer) {
+            $player = Player::create([
+                'game_id' => $game->id,
+                'explorer_role' => ExplorerRole::from($selectedExplorer),
+                'current_health' => GameController::MAX_HEALTH,
+                'max_health' => GameController::MAX_HEALTH,
+                'item' => NULL,
+                'player_status' => PlayerStatus::ACTIVE,
+                'turn_order' => $index + 1,
+                'is_current_player' => $index === 0,
+                'current_placed_subtile_id' => $startingSubtile->id,
+                'actions_remaining' => GameController::MAX_ACTIONS_PER_TURN
+            ]);
         }
 
         return response()->json([
