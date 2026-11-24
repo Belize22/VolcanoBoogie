@@ -2,7 +2,9 @@ import { PageProps } from '@inertiajs/core';
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { Dice } from '@/interfaces/dice';
+import { ErrorDto } from '@/interfaces/error-dto';
 import { Game } from '@/interfaces/game';
+import { GameDto } from '@/interfaces/game-dto';
 import { Player } from '@/interfaces/player';
 import { Coordinate } from '@/interfaces/coordinate';
 import { CanvasInteractionState } from '@/enums/canvas-interaction-state';
@@ -10,6 +12,7 @@ import { GameState } from '@/enums/game-state';
 import { GameStatus } from '@/enums/game-status';
 import { PathType } from '@/enums/path-type';
 import { PlacementStatus } from '@/enums/placement-status';
+import { endTurn } from '@/services/board-service';
 import { getCoordinateRelativeToDirection } from '@/helpers/coordinate-helpers';
 import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/rotation-helpers';
 import { Map, SquareMenu } from 'lucide-react';
@@ -193,28 +196,19 @@ export default function PlayGame() {
         });
     }
 
-    function endTurn() {
-        fetch('/api/end-turn', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                gameId: currentGame.id,
-            })
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                setCurrentGame(data.game);
+    async function resolveEndTurn() {
+        const data: GameDto | ErrorDto = await endTurn(currentGame.id);
+
+        if ("success" in data && data.success) {
+            console.log(data);
+            setCurrentGame(data.game);
+            if (data.diceRoll && data.diceRoll.dice) {
                 setDiceTray(data.diceRoll.dice);
             }
-            else if (data.error) {
-                console.log(data);
-                triggerErrorMessage(data.message);
-            }
-        });
+        }
+        else if ("error" in data && data.error) {
+            triggerErrorMessage(data.message);
+        }
     }
 
     function rotateTile(isClockwise: boolean) {
@@ -334,7 +328,7 @@ export default function PlayGame() {
                     gameState={currentGame.game_state}
                 />
                 <Footer
-                    endTurn={endTurn}
+                    endTurn={resolveEndTurn}
                 />
                 <Sidebar
                     currentPlayers={game.players}
