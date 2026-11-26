@@ -12,7 +12,6 @@ import { GameState } from '@/enums/game-state';
 import { GameStatus } from '@/enums/game-status';
 import { PathType } from '@/enums/path-type';
 import { PlacementStatus } from '@/enums/placement-status';
-import { endTurn } from '@/services/board-service';
 import { getCoordinateRelativeToDirection } from '@/helpers/coordinate-helpers';
 import { convertRotationToNumeric, convertNumericToRotation } from '@/helpers/rotation-helpers';
 import { Map, SquareMenu } from 'lucide-react';
@@ -203,7 +202,6 @@ export default function PlayGame() {
         const data: GameDto | ErrorDto = await serviceFunction(...parameters);
         
         if ("success" in data && data.success) {
-            console.log(data);
             setCurrentGame(data.game);
             if (data.diceRoll && data.diceRoll.dice) {
                 setDiceTray(data.diceRoll.dice);

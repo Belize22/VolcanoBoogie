@@ -1,7 +1,10 @@
 import { PageProps } from '@inertiajs/core';
 import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
+import { getGames } from '@/services/game-service';
+import { ErrorDto } from '@/interfaces/error-dto';
 import { Game } from '@/interfaces/game';
+import { GamesDto } from '@/interfaces/games-dto';
 import { GameStatus } from '@/enums/game-status';
 import FilterPane from '@/components/view-games/filter-pane';
 import GamePane from '@/components/view-games/game-pane';
@@ -15,32 +18,21 @@ export default function ViewGames() {
     const [currentGames, setCurrentGames] = useState<Game[]>(games);
     const [showCompletedGames, setShowCompletedGames] = useState<boolean>(false);
 
-    function updateGameList() {
+    async function updateGameList() {
         const statusList = [GameStatus.IN_PROGRESS];
 
         if (showCompletedGames) {
             statusList.push(GameStatus.COMPLETE);
         }
 
-        fetch('/api/get-games', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                statusList: statusList
-            })
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                setCurrentGames(data.games);
-            }
-            else if (data.error) {
-                console.log(data);
-            }
-        });
+        const data: GamesDto | ErrorDto = await getGames(statusList);
+
+        if ("success" in data && data.success) {
+            setCurrentGames(data.games);
+        }
+        else if ("error" in data && data.error) {
+            console.log(data);
+        }
     }
 
     useEffect(() => {

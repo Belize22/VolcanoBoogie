@@ -2,8 +2,11 @@ import { PageProps } from '@inertiajs/core';
 import { useState } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import { Play, X } from 'lucide-react';
+import { createGame } from '@/services/game-service';
 import { Difficulty } from '@/enums/difficulty';
 import { ExplorerRole } from '@/enums/explorer-role';
+import { CreateGameDto } from '@/interfaces/create-game-dto';
+import { ErrorDto } from '@/interfaces/error-dto';
 import { DifficultyOptions } from '@/interfaces/difficulty-options';
 import { NumExplorerOptions } from '@/interfaces/num-explorer-options';
 import { TurnPreset } from '@/interfaces/turn-preset';
@@ -86,27 +89,15 @@ export default function StartGame() {
         }
     }
     
-    function createGame() {
-        fetch('/api/create-game', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                selectedExplorerRoles: selectedExplorerRoles, 
-                selectedDifficulty: selectedDifficulty
-            })
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                router.get(data.redirect_url);
-            }
-            if (data.error) {
-                console.log(data);
-            }
-        });
+    async function resolveCreateGame() {
+        const data: CreateGameDto | ErrorDto = await createGame(selectedExplorerRoles, selectedDifficulty);
+        
+        if ("success" in data && data.success) {
+            router.get(data.redirect_url);
+        }
+        if ("error" in data && data.error) {
+            console.log(data);
+        }
     }
 
     return (
@@ -172,7 +163,7 @@ export default function StartGame() {
                             </button>
                             <button
                                 className={selectedExplorerRoles.includes(undefined) ? DISABLED_START_GAME_STYLE : ENABLED_START_GAME_STYLE}
-                                onClick={selectedExplorerRoles.includes(undefined) ? undefined : createGame}
+                                onClick={selectedExplorerRoles.includes(undefined) ? undefined : resolveCreateGame}
                             >
                                 <Play/>
                                 <p>Start Game</p>
