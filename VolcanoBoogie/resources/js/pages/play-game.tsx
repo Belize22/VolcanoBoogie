@@ -196,9 +196,12 @@ export default function PlayGame() {
         });
     }
 
-    async function resolveEndTurn() {
-        const data: GameDto | ErrorDto = await endTurn(currentGame.id);
-
+    async function updateGameState<TArgs extends any[], TReturn>(
+        serviceFunction: (...parameters: TArgs) => Promise<any>,
+        ...parameters: TArgs
+    ) {
+        const data: GameDto | ErrorDto = await serviceFunction(...parameters);
+        
         if ("success" in data && data.success) {
             console.log(data);
             setCurrentGame(data.game);
@@ -207,6 +210,7 @@ export default function PlayGame() {
             }
         }
         else if ("error" in data && data.error) {
+            console.log(data);
             triggerErrorMessage(data.message);
         }
     }
@@ -328,7 +332,8 @@ export default function PlayGame() {
                     gameState={currentGame.game_state}
                 />
                 <Footer
-                    endTurn={resolveEndTurn}
+                    gameId={currentGame.id}
+                    updateGameState={updateGameState}
                 />
                 <Sidebar
                     currentPlayers={game.players}
